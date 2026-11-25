@@ -1,29 +1,18 @@
-# Our Slice
+# Our Slice — Bush Block Update 2
 
-Private cooperative adventure game project. This starter is an **offline-style single-player browser exploration scene**, not yet the planned multiplayer game.
+This is a **single-player, local-save** browser build of Our Slice, made for testing on a phone. It uses the Canvas API and does not require a build step or external libraries.
 
-## Try the first build
+## Features
+- Larger scrolling bush block with a creek, trails, granite and trees
+- Silver-grey campervan with a darker lower section
+- One-tap campervan pop-top/awning, swag or tent camping preset
+- Collect materials and transfer them to campervan storage
+- Six discovery landmarks
+- Aggie follows the player and occasionally barks at a bird
+- Browser-local progress saving (`localStorage`)
 
-Open `game/index.html` using a static web server (for example GitHub Pages, if enabled, or another static hosting provider). The game loads Phaser 3 from a public CDN, so an internet connection is required.
+## Deploy
+Replace the repository root `index.html` with the one in this package and commit. If GitHub Pages publishes from the `main` branch root, refresh the site after deployment. Do not upload the containing folder instead of its files.
 
-- On Android: use the onscreen arrow controls.
-- On desktop: arrow keys or WASD.
-- Walk near four glowing markers to discover places.
-
-## What's included
-
-A bush block, creek, trees, granite rocks, campervan, temporary player and dog artwork, camera follow, touchscreen movement and four discoveries.
-
-## Not included yet
-
-Multiplayer, accounts, server, persistent saving, driving, crafting, building, final character art, or the other destinations. These will be implemented as later stages.
-
-## Layout
-
-`game/index.html` — browser entry point  
-`game/style.css` — layout and touch controls  
-`game/game.js` — Phaser scene
-
-## Privacy
-
-Keep the repository private while the game is a surprise. GitHub Pages may require a public repository depending on your plan; **do not change repository visibility** just to test this build. We can choose private-source-friendly hosting when ready.
+## Limitations
+This is a standalone gameplay iteration, not the final multiplayer architecture. Browser saves are **per device** and are not shared between players. The game remains accessible to anyone who knows its GitHub Pages URL. No real-world animal art assets or final character sprites are included yet.
