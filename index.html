@@ -2,12 +2,12 @@
 (()=>{'use strict';const canvas=document.getElementById('view'),ctx=canvas.getContext('2d'),msg=document.getElementById('msg'),panel=document.getElementById('panel');const W=1900,H=1450;let player={x:830,y:750},dog={x:860,y:772},camera={x:0,y:0},keys={up:false,down:false,left:false,right:false},inventory={},stored={},camp='none',discovered=new Set(),last=0,bird=0,swear=0;const spots=[{x:660,y:590,n:'Campervan',desc:'Your silver-grey HiAce with its pop-top and awning.'},{x:1100,y:440,n:'Granite lookout',desc:'A broad granite outcrop, warm in the afternoon sun.'},{x:960,y:1040,n:'Seasonal creek',desc:'A winding seasonal creek running through the property.'},{x:425,y:960,n:'Old walking trail',desc:'A quiet track through the woodland.'},{x:1510,y:770,n:'Secret clearing',desc:'A sheltered clearing with room to build or garden.'},{x:1400,y:1160,n:'Unusual tree',desc:'There is a tiny, curious hollow in the trunk.'}];const finds=[{x:745,y:690,n:'Fallen branch',item:'Timber',qty:2},{x:1190,y:520,n:'Smooth stones',item:'Stone',qty:3},{x:520,y:875,n:'Gumnuts',item:'Gumnuts',qty:4},{x:1520,y:815,n:'Interesting bottle',item:'Vintage bottle',qty:1},{x:1130,y:1130,n:'Driftwood',item:'Driftwood',qty:1},{x:370,y:490,n:'Old tin',item:'Vintage tin',qty:1}];let foreshore={x:350,y:430},fishCaught={},jettyWalked=false,foreshoreFound=new Set(),trainRides=0;let scene='cafe', cafePos={x:365,y:310}, cafeGames=0, cafeBest=0, gameRound=null, gameStep=0, gameAnswers={}, gameScore=0;
 // Experimental peer-to-peer multiplayer. PeerJS public signalling is an external dependency.
 const NET_PREFIX='ourslice-xmas70-';
-let netPeer=null,netConn=null,netRole=null,netRoom='',netRemote=null,netLastSend=0;let sharedGame=null;
+let netPeer=null,netConn=null,netRole=null,netRoom='',netRemote=null,netLastSend=0;let sharedGame=null;let sharedTrip=null;let sharedHistory=[];
 const netButton=document.createElement('button');netButton.textContent='Multiplayer';netButton.style.fontSize='15px';netButton.style.padding='9px';
 document.getElementById('travel').insertAdjacentElement('afterend',netButton);
 const netStatus=document.createElement('div');netStatus.style.cssText='font:12px system-ui;padding:4px 14px;color:#d9ebdb';netStatus.textContent='Multiplayer: offline';document.getElementById('stage').insertAdjacentElement('beforebegin',netStatus);
 function netSay(t){netStatus.textContent='Multiplayer: '+t}
-function netClean(){if(netConn){try{netConn.close()}catch{}}if(netPeer){try{netPeer.destroy()}catch{}}netPeer=null;netConn=null;netRemote=null;netRole=null;netRoom='';sharedGame=null;netSay('offline')}
+function netClean(){if(netConn){try{netConn.close()}catch{}}if(netPeer){try{netPeer.destroy()}catch{}}netPeer=null;netConn=null;netRemote=null;netRole=null;netRoom='';sharedGame=null;sharedTrip=null;netSay('offline')}
 function netDialog(){open('Our Slice · Two-player test',`<p>Use two browser tabs on one phone to test. Each tab must choose a different player.</p><button id="create-room">Create room · Tegan</button><button id="join-room">Join room · Kieran</button><button id="leave-room">Disconnect</button><p id="room-feedback">${netRoom?'Current room: '+netRoom:'Not connected'}</p><p>Experimental internet connection using a public PeerJS signalling service. No account or private server required for this test; service availability is not guaranteed.</p>`);
 document.getElementById('create-room').onclick=netCreate;
 document.getElementById('join-room').onclick=()=>{open('Join Tegan',`<p>Enter the six-character code shown on Tegan’s screen.</p><input id="join-code" maxlength="6" autocomplete="off" autocapitalize="characters" placeholder="ROOM CODE" style="font-size:22px;width:100%;padding:10px;color:#222;background:#fff"><button id="connect-room">Join as Kieran</button>`);document.getElementById('connect-room').onclick=()=>netJoin(document.getElementById('join-code').value)};
@@ -16,7 +16,7 @@ document.getElementById('leave-room').onclick=()=>{netClean();panel.style.displa
 netButton.onclick=netDialog;
 function netAttach(c){netConn=c;netSay('connecting to '+(netRole==='host'?'Kieran':'Tegan')+'…');
 c.on('open',()=>{netSay('CONNECTED · '+(netRole==='host'?'Tegan':'Kieran')+' · '+netRoom+' · independent travel');panel.style.display='none';netSend(true);if(netRole==='host'&&sharedGame)sendSharedState()});
-c.on('data',d=>{if(handleSharedMessage(d))return;if(!d||d.type!=='position'||!['cafe','foreshore','bush','opshop','bunnings','salvage'].includes(d.scene)||!Number.isFinite(d.x)||!Number.isFinite(d.y))return;netRemote={scene:d.scene,x:d.x,y:d.y,role:d.role,at:Date.now()}});
+c.on('data',d=>{if(handleTravelMessage(d))return;if(handleSharedMessage(d))return;if(!d||d.type!=='position'||!['cafe','foreshore','bush','opshop','bunnings','salvage'].includes(d.scene)||!Number.isFinite(d.x)||!Number.isFinite(d.y))return;netRemote={scene:d.scene,x:d.x,y:d.y,role:d.role,at:Date.now()}});
 c.on('close',()=>{netConn=null;netRemote=null;netSay('other player disconnected · room '+netRoom)});
 c.on('error',e=>netSay('connection error: '+(e.type||e.message||'unknown')));
 }
@@ -36,26 +36,63 @@ if(scene==='bush'){x-=camera.x;y-=camera.y}else if(scene==='foreshore'){const of
 if(x<0||x>640||y<0||y>450)return;
 ctx.save();drawPerson(x,y,netRemote.role==='host'?'#ad5967':'#3d6665','#47352b',netRemote.role==='host');ctx.fillStyle='#fffbe8';ctx.strokeStyle='#203f2b';ctx.lineWidth=3;ctx.font='bold 14px system-ui';const label=netRemote.role==='host'?'Tegan':'Kieran';ctx.strokeText(label,x-25,y-47);ctx.fillText(label,x-25,y-47);ctx.restore();}
 const questions=[
-{q:'Which drink would they choose?',a:['Coke','Fanta','Piña colada']},
-{q:'Which ridiculous superpower would they want?',a:['Talk to birds','Teleport to op shops','Never lose the car keys']},
-{q:'Which holiday sounds best?',a:['Remote bush camping','Luxury resort','Mystery road trip']},
-{q:'Smash, marry, kill: who would they marry?',a:['A charming vampire','A pirate captain','A mysterious wizard']},
-{q:'Which treasure would they bring home?',a:['A vintage lamp','A weird garden statue','A mysterious locked box']},
-{q:'What would they do with a free afternoon?',a:['Go exploring','Play games','Have a nap']},
-{q:'Which tiny inconvenience would annoy them most?',a:['Flies in the van','Wet socks','Losing the TV remote']},
-{q:'What would they order to share?',a:['Lotus chips','Cake','A giant bowl of chips']},
-{q:'Which animal would they want to meet?',a:['Numbat','Tawny frogmouth','Quokka']}
+{q:'Which move would make them smile first?',a:['A very suspicious wink','A kiss out of nowhere','A completely filthy pun','An invitation to cuddle']},
+{q:'Which ridiculous secret code should mean “come flirt with me”?',a:['The possum has landed','Check the tyre pressure','Emergency lotus chips','The goose is loose']},
+{q:'What would make a first move feel easier?',a:['A playful text','An obvious invitation','A secret signal','Planning a little time together']},
+{q:'What sounds most intriguing to explore together?',a:['Playful role-play','More teasing and anticipation','Taking turns planning a date','New ways to talk about touch']},
+{q:'What would be the funniest way to ruin a romantic moment?',a:['Aggie barking at nothing','A dramatic stomach growl','The van alarm going off','Someone saying “nice weather”']},
+{q:'Which unexpected compliment would work best?',a:['You look dangerously good','I like the way you think','Come here, trouble','You are my favourite bad idea']},
+{q:'Which would they be most curious about?',a:['A blind-date-style surprise','A playful dress-up theme','A shared curiosity list','A slow evening with no agenda']},
+{q:'What does a comfortable invitation sound like?',a:['Would you like a kiss?','Can I steal you for a minute?','Fancy some mischief?','Want to sit close?']},
+{q:'If Bruce at Bunnings winked at a mysterious gadget, what next?',a:['Ask for a demonstration','Walk away laughing','Buy two for no reason','Send Maddie a photo']},
+{q:'Which ridiculous superpower would they want?',a:['Talk to birds','Teleport to op shops','Never lose the car keys','Silence every mosquito']},
+{q:'Which romantic plan sounds most fun?',a:['A surprise picnic','A cheeky scavenger hunt','A massage and a movie','A secret rendezvous']},
+{q:'What makes trying a new idea feel safest?',a:['Knowing “no” is easy','Being able to laugh','Talking it through first','Having no expectations']},
+{q:'Who is most likely to send a message to the wrong chat?',a:['Tegan','Kieran','Both equally','Aggie somehow']},
+{q:'Which treasure would they bring home?',a:['A vintage lamp','A weird garden statue','A mysterious locked box','A secondhand disco ball']},
+{q:'What would they order to share?',a:['Lotus chips','Cake','A giant bowl of chips','Whatever Maddie recommends']},
+{q:'Which animal would they want to meet?',a:['Numbat','Tawny frogmouth','Quokka','An extremely judgmental emu']}
 ];
 function cafeSave(){try{localStorage.setItem('our-slice-cafe-v1',JSON.stringify({scene,cafeGames,cafeBest}))}catch{};try{localStorage.setItem('our-slice-foreshore-v1',JSON.stringify({foreshore,fishCaught,jettyWalked,foreshoreFound:[...foreshoreFound],trainRides}))}catch{}}
 try{const c=JSON.parse(localStorage.getItem('our-slice-cafe-v1')||'{}');scene=c.scene||'cafe';cafeGames=c.cafeGames||0;cafeBest=c.cafeBest||0}catch{}
 try{const f=JSON.parse(localStorage.getItem('our-slice-foreshore-v1')||'{}');if(f.foreshore&&Number.isFinite(f.foreshore.x)&&Number.isFinite(f.foreshore.y))foreshore=f.foreshore;fishCaught=f.fishCaught||{};jettyWalked=!!f.jettyWalked;foreshoreFound=new Set(f.foreshoreFound||[]);trainRides=f.trainRides||0}catch{}
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function sharedTravelOffer(destination){
+ if(!netConn||!netConn.open){startRoadTrip(destination);return}
+ if(sharedTrip){say('A travel invitation is already pending.');return}
+ const id=Date.now();
+ sharedTrip={id,to:destination,from:scene,initiator:true};
+ sendShared({type:'travel-invite',id,to:destination,from:scene});
+ open('Invite to travel together',`<p>Waiting for ${netRole==='host'?'Kieran':'Tegan'} to accept the trip to ${destination==='bush'?'Our Slice':'Cuntown'}.</p><button id="cancel-shared-trip">Cancel invitation</button>`);
+ document.getElementById('cancel-shared-trip').onclick=()=>{sendShared({type:'travel-cancel',id});sharedTrip=null;panel.style.display='none'};
+}
+function handleTravelMessage(d){
+ if(!d||typeof d!=='object'||!['travel-invite','travel-accept','travel-cancel','travel-decline','travel-go'].includes(d.type))return false;
+ if(d.type==='travel-invite'){
+  if(!['bush','foreshore'].includes(d.to)||!Number.isFinite(d.id))return true;
+  sharedTrip={id:d.id,to:d.to,from:d.from,initiator:false};
+  open('Road trip invitation',`<p>${netRole==='host'?'Kieran':'Tegan'} wants to travel together to ${d.to==='bush'?'Our Slice':'Cuntown'}.</p><button id="accept-shared-trip">Get in the HiAce</button><button id="decline-shared-trip">Not yet</button>`);
+  document.getElementById('accept-shared-trip').onclick=()=>{if(!sharedTrip||sharedTrip.id!==d.id)return;sendShared({type:'travel-accept',id:d.id});panel.style.display='none';say('Getting in the van… waiting for departure.')};
+  document.getElementById('decline-shared-trip').onclick=()=>{sendShared({type:'travel-decline',id:d.id});sharedTrip=null;panel.style.display='none'};
+  return true;
+ }
+ if(!sharedTrip||sharedTrip.id!==d.id)return true;
+ if(d.type==='travel-decline'||d.type==='travel-cancel'){sharedTrip=null;panel.style.display='none';say('Shared road trip cancelled.');return true}
+ if(d.type==='travel-accept'&&sharedTrip.initiator){
+   sendShared({type:'travel-go',id:d.id,to:sharedTrip.to});
+   const dest=sharedTrip.to;sharedTrip=null;startRoadTrip(dest);return true;
+ }
+ if(d.type==='travel-go'&&!sharedTrip.initiator&&d.to===sharedTrip.to){
+   const dest=sharedTrip.to;sharedTrip=null;startRoadTrip(dest);return true;
+ }
+ return true;
+}
 function startRoadTrip(destination){cancelTouchMovement();
 if(roadTrip)return;
 tripFrom=scene;
 roadTrip={from:scene,to:destination,start:performance.now(),duration:6500};
 panel.style.display='none';
-say('Road trip! Tegan, Kieran and Aggie are travelling together.');
+say('Road trip underway. Both players should arrive at the same destination.');
 }
 function finishRoadTrip(){
 const dest=roadTrip.to;roadTrip=null;vanDrive.active=false;
@@ -65,14 +102,14 @@ setScene(dest);
 }
 function showRoadExit(){
 open('Road signs',`<p>Where are we heading?</p><button data-road="foreshore">Cuntown town</button><button data-road="bush">Our Slice · Home block</button><p>Dwellingup and Northcliffe will be added as separate camping destinations.</p>`);
-panel.querySelectorAll('[data-road]').forEach(b=>b.onclick=()=>{if(b.dataset.road===scene){panel.style.display='none';say('You are already here.');return}startRoadTrip(b.dataset.road)});
+panel.querySelectorAll('[data-road]').forEach(b=>b.onclick=()=>{if(b.dataset.road===scene){panel.style.display='none';say('You are already here.');return}sharedTravelOffer(b.dataset.road)});
 }
 function startDriving(){
 vanDrive.active=true;vanDrive.x=foreshore.x;vanDrive.y=foreshore.y;
 panel.style.display='none';say('Driving the HiAce. Use the arrows. Approach the signed road exit to travel.');
 }
 function stopDriving(){vanDrive.active=false;foreshore.x=vanDrive.x;foreshore.y=vanDrive.y;panel.style.display='none';say('Van parked. Explore on foot.')}
-function setScene(v){cancelTouchMovement();if(v==='foreshore'&&scene!=='foreshore'){companion.foreshore.k={x:foreshore.x-80,y:foreshore.y+20};companion.foreshore.a={x:foreshore.x+45,y:foreshore.y+22}}scene=v;panel.style.display='none';cafeSave();const b=document.getElementById('explore');if(shops[v]){say('Explore '+shops[v].title+'.');b.textContent='Interact / Exit'}else if(v==='cafe'){say('You control Tegan. Kieran and Aggie follow independently. Walk to Maddie or the EXIT.');b.textContent='Interact / Exit'}else if(v==='foreshore'){say('Explore Cuntown foreshore and the very long jetty. Aggie is with you.');b.textContent='Interact / Fish'}else{say('Explore the bush block. Walk near something and tap Explore.');b.textContent='Explore / Collect'}hud()}
+function setScene(v){cancelTouchMovement();if(v==='foreshore'&&scene!=='foreshore'){companion.foreshore.k={x:foreshore.x-80,y:foreshore.y+20};companion.foreshore.a={x:foreshore.x+45,y:foreshore.y+22}}scene=v;panel.style.display='none';cafeSave();const b=document.getElementById('explore');if(shops[v]){say('Explore '+shops[v].title+'.');b.textContent='Interact / Exit'}else if(v==='cafe'){say('Walk to Maddie or the EXIT. Both players can explore independently.');b.textContent='Interact / Exit'}else if(v==='foreshore'){say('Explore Cuntown foreshore and the very long jetty. Aggie is with you.');b.textContent='Interact / Fish'}else{say('Explore the bush block. Walk near something and tap Explore.');b.textContent='Explore / Collect'}hud()}
 function travel(){open('Map and travel',`<p>Cuntown is one town: Goose Café, the jetty, the op shop, Bunnings and salvage yard are all within the town.</p><button data-dest="cafe">Goose Café (in town)</button><button data-dest="foreshore">Cuntown foreshore (in town)</button><button data-shopwalk="opshop">Walk to op shop</button><button data-shopwalk="bunnings">Walk to Bunnings</button><button data-shopwalk="salvage">Walk to salvage yard</button><button id="roads">Road signs · Drive to another destination</button>`);panel.querySelectorAll('[data-dest]').forEach(b=>b.onclick=()=>setScene(b.dataset.dest));panel.querySelectorAll('[data-shopwalk]').forEach(b=>b.onclick=()=>{setScene('foreshore');foreshore.x=shops[b.dataset.shopwalk].door.x;foreshore.y=shops[b.dataset.shopwalk].door.y+55;say('You are outside '+shops[b.dataset.shopwalk].title+'. Tap Interact to enter.')});document.getElementById('roads').onclick=showRoadExit}
 // Independent companions. Tegan is the only controllable character in this offline build.
 let vanDrive={x:450,y:790,active:false},roadTrip=null,tripFrom=null;let companion={cafe:{k:{x:445,y:340},a:{x:405,y:370}},foreshore:{k:{x:300,y:460},a:{x:330,y:490}}};
@@ -145,32 +182,32 @@ if(x>JETTY_END-190){foreshoreFound.add('Jetty end');jettyWalked=true;open('End o
 say('Keep exploring. The train station is near the jetty entrance; fishing works along the jetty.')}
 function talkMaddie(){const connected=!!(netConn&&netConn.open);open('Maddie · Goose Café',`<p>“Table for two? You two look suspiciously polite.”</p><p>Fancy a little game to see how well you know each other?</p>${connected?'<button id="start-shared">Play together · private answers</button>':'<p>Connect both players using Multiplayer to play on separate phones.</p>'}<button id="startgame">Play locally · pass the phone</button>`);document.getElementById('startgame').onclick=startGame;if(connected)document.getElementById('start-shared').onclick=()=>{if(netRole==='host')startSharedGame();else{sendShared({type:'game-request'});open('Waiting for Tegan',`<p>Game invitation sent. Tegan can start the round.</p><button id="wait-close">Close</button>`);document.getElementById('wait-close').onclick=()=>panel.style.display='none'}}}
 function sendShared(data){if(netConn&&netConn.open)netConn.send(data)}
-function sendSharedState(){if(!sharedGame)return;sendShared({type:'game-state',id:sharedGame.id,round:sharedGame.round,step:sharedGame.step,score:sharedGame.score,answersReady:[sharedGame.answers.host!==null,sharedGame.answers.guest!==null],revealed:sharedGame.revealed,...(sharedGame.revealed?{hostAnswer:sharedGame.answers.host,guestAnswer:sharedGame.answers.guest}:{})})}
-function startSharedGame(){if(netRole!=='host'||!netConn||!netConn.open){say('Both players must connect first.');return}sharedGame={id:Date.now(),round:[...questions].sort(()=>Math.random()-.5).slice(0,3),step:0,score:0,answers:{host:null,guest:null},revealed:false};sendSharedState();renderSharedGame()}
+function sendSharedState(){if(!sharedGame)return;sendShared({type:'game-state',id:sharedGame.id,round:sharedGame.round,step:sharedGame.step,score:sharedGame.score,answersReady:[sharedGame.answers.host!==null,sharedGame.answers.guest!==null],revealed:sharedGame.revealed,history:sharedGame.history||[],...(sharedGame.revealed?{hostAnswer:sharedGame.answers.host,guestAnswer:sharedGame.answers.guest}:{})})}
+function startSharedGame(){if(netRole!=='host'||!netConn||!netConn.open){say('Both players must connect first.');return}sharedGame={id:Date.now(),round:[...questions].sort(()=>Math.random()-.5).slice(0,5),step:0,score:0,answers:{host:null,guest:null},revealed:false,history:[]};sendSharedState();renderSharedGame()}
 function renderSharedGame(){
 if(!sharedGame)return;
 const g=sharedGame,me=netRole,question=g.round[g.step];
-if(g.step>=g.round.length){open('Maddie · Results',`<p>You matched <b>${g.score} out of ${g.round.length}</b> answers.</p>${me==='host'?'<button id="shared-again">Play again</button>':'<p>Tegan can start another round.</p>'}<button id="shared-close">Finish</button>`);const again=document.getElementById('shared-again');if(again)again.onclick=startSharedGame;document.getElementById('shared-close').onclick=()=>panel.style.display='none';return}
+if(g.step>=g.round.length){open('Maddie · Results',`<p>You matched <b>${g.score} out of ${g.round.length}</b> answers.</p><div style='max-height:220px;overflow:auto'>${(g.history||[]).map((h,i)=>`<p><b>${i+1}. ${escapeHtml(h.q)}</b><br>Tegan: ${escapeHtml(h.tegan)}<br>Kieran: ${escapeHtml(h.kieran)}<br>${h.matched?'Matched':'Different answers'}</p>`).join('')}</div>${me==='host'?'<button id="shared-again">Play again</button>':'<p>Tegan can start another round.</p>'}<button id="shared-close">Finish</button>`);const again=document.getElementById('shared-again');if(again)again.onclick=startSharedGame;document.getElementById('shared-close').onclick=()=>panel.style.display='none';return}
 if(g.revealed){const a=g.answers.host,b=g.answers.guest;const matched=a===b;open('Reveal · Question '+(g.step+1),`<p><b>${matched?'You matched!':'Different answers this time.'}</b></p><p>Tegan chose: ${escapeHtml(question.a[a])}</p><p>Kieran chose: ${escapeHtml(question.a[b])}</p>${me==='host'?'<button id="shared-next">Next question</button>':'<p>Waiting for Tegan to continue…</p>'}`);const next=document.getElementById('shared-next');if(next)next.onclick=()=>{g.step++;g.answers={host:null,guest:null};g.revealed=false;sendSharedState();renderSharedGame()};return}
 const mine=g.answers[me],other=g.answers[me==='host'?'guest':'host'];
 open('Private answers · '+(g.step+1)+' / '+g.round.length,`<p><b>${escapeHtml(question.q)}</b></p><p>Choose your own answer. It stays hidden until both have chosen.</p>${mine===null?question.a.map((v,i)=>`<button data-shared-answer="${i}">${escapeHtml(v)}</button>`).join(''):`<p>Your answer is locked in. ${other===null?'Waiting for the other player…':'Ready to reveal…'}</p>`}`);
 panel.querySelectorAll('[data-shared-answer]').forEach(el=>el.onclick=()=>{const n=Number(el.dataset.sharedAnswer);if(g.answers[me]!==null)return;g.answers[me]=n;if(me==='guest')sendShared({type:'game-answer',id:g.id,step:g.step,answer:n});else checkSharedReveal();renderSharedGame()});
 }
-function checkSharedReveal(){const g=sharedGame;if(netRole!=='host'||!g||g.revealed||g.answers.host===null||g.answers.guest===null)return;g.revealed=true;if(g.answers.host===g.answers.guest)g.score++;sendSharedState();renderSharedGame()}
+function checkSharedReveal(){const g=sharedGame;if(netRole!=='host'||!g||g.revealed||g.answers.host===null||g.answers.guest===null)return;g.revealed=true;g.history.push({q:g.round[g.step].q,tegan:g.round[g.step].a[g.answers.host],kieran:g.round[g.step].a[g.answers.guest],matched:g.answers.host===g.answers.guest});if(g.answers.host===g.answers.guest)g.score++;sendSharedState();renderSharedGame()}
 function handleSharedMessage(d){
 if(!d||typeof d!=='object'||typeof d.type!=='string'||!d.type.startsWith('game-'))return false;
 if(d.type==='game-request'){if(netRole==='host')open('Kieran wants to play',`<p>Kieran is ready for Maddie's guessing game.</p><button id="accept-game">Start together</button>`);const accept=document.getElementById('accept-game');if(accept)accept.onclick=startSharedGame;return true}
 if(d.type==='game-answer'){if(netRole==='host'&&sharedGame&&d.id===sharedGame.id&&d.step===sharedGame.step&&sharedGame.answers.guest===null&&Number.isInteger(d.answer)&&d.answer>=0&&d.answer<sharedGame.round[sharedGame.step].a.length){sharedGame.answers.guest=d.answer;checkSharedReveal();if(!sharedGame.revealed)renderSharedGame()}return true}
-if(d.type==='game-state'){if(netRole!=='guest'||!Array.isArray(d.round)||d.round.length!==3||!Number.isInteger(d.step)||d.step<0||d.step>3||!Number.isInteger(d.score))return true;
+if(d.type==='game-state'){if(netRole!=='guest'||!Array.isArray(d.round)||d.round.length!==5||!Number.isInteger(d.step)||d.step<0||d.step>5||!Number.isInteger(d.score))return true;
 const prev=sharedGame,changed=!prev||prev.id!==d.id||prev.step!==d.step;
-sharedGame={id:d.id,round:d.round,step:d.step,score:d.score,answers:{host:null,guest:changed?null:prev.answers.guest},revealed:!!d.revealed};
+sharedGame={id:d.id,round:d.round,step:d.step,score:d.score,answers:{host:null,guest:changed?null:prev.answers.guest},revealed:!!d.revealed,history:Array.isArray(d.history)?d.history:[]};
 if(d.revealed&&d.step<d.round.length){ // Answers are sent only after both are ready.
  sharedGame.answers.host=d.hostAnswer;sharedGame.answers.guest=d.guestAnswer;
 }
 renderSharedGame();return true}
 return true;
 }
-function startGame(){gameRound=[...questions].sort(()=>Math.random()-.5).slice(0,3);gameStep=0;gameScore=0;gameAnswers={};showQuestion()}
+function startGame(){gameRound=[...questions].sort(()=>Math.random()-.5).slice(0,5);gameStep=0;gameScore=0;gameAnswers={};showQuestion()}
 function showQuestion(){if(gameStep>=gameRound.length){cafeGames++;cafeBest=Math.max(cafeBest,gameScore);cafeSave();open('Maddie · Results',`<p>“Well, that was revealing.”</p><p>You matched <b>${gameScore} out of ${gameRound.length}</b> answers.</p><p>Games played: ${cafeGames} · Best: ${cafeBest}/${gameRound.length}</p><button id="again">Play again</button><button id="done">Finish date</button>`);document.getElementById('again').onclick=startGame;document.getElementById('done').onclick=()=>{panel.style.display='none';say('First date memory added to your journal. You can return to Maddie any time.')};return}
 const item=gameRound[gameStep];const chooser=gameAnswers.secret===undefined?'Kieran':'Tegan';const role=chooser==='Kieran'?'Kieran secretly chooses their own answer. Tegan must look away.':'Tegan guesses what Kieran chose. Kieran must look away.';open(`Question ${gameStep+1} of ${gameRound.length}`,`<p><b>${escapeHtml(item.q)}</b></p><p>${role}</p>${item.a.map((a,i)=>`<button class="guess-option" data-answer="${i}">${escapeHtml(a)}</button>`).join('')}<p><small>Keep answers private until both have chosen.</small></p>`);panel.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{const n=Number(b.dataset.answer);if(gameAnswers.secret===undefined){gameAnswers.secret=n;open('Pass the phone',`<p>Kieran's choice is hidden.</p><p>Pass the phone to Tegan. Don't peek!</p><button id="continueguess">Ready to guess</button>`);document.getElementById('continueguess').onclick=showQuestion}else{const correct=n===gameAnswers.secret;if(correct)gameScore++;open('Reveal!',`<p>${correct?'You matched!':'Different answers this time.'}</p><p>Kieran chose: <b>${escapeHtml(item.a[gameAnswers.secret])}</b></p><p>Tegan guessed: <b>${escapeHtml(item.a[n])}</b></p><button id="nextguess">${gameStep===gameRound.length-1?'See results':'Next question'}</button>`);document.getElementById('nextguess').onclick=()=>{gameStep++;gameAnswers={};showQuestion()}}})}
 document.getElementById('travel').onclick=travel;
@@ -356,6 +393,6 @@ function movementVector(dt){
  if(v>1){touchMove.velocity.x/=v;touchMove.velocity.y/=v}
  return touchMove.velocity;
 }
-function frame(t){const dt=Math.min(40,t-last||16);last=t;if(shops[scene]&&panel.style.display==='none'){const move=movementVector(dt);shopPos.x=Math.max(42,Math.min(595,shopPos.x+move.x*dt*WALK_SPEED));shopPos.y=Math.max(100,Math.min(410,shopPos.y+move.y*dt*WALK_SPEED));if(shopPos.x<145&&shopPos.y>396)leaveShop()}
-if(!roadTrip&&scene==='cafe'&&panel.style.display==='none'){const move=movementVector(dt);cafePos.x=Math.max(35,Math.min(570,cafePos.x+move.x*dt*WALK_SPEED));cafePos.y=Math.max(225,Math.min(395,cafePos.y+move.y*dt*WALK_SPEED));if(cafePos.x<125&&cafePos.y>365){setScene('foreshore');foreshore.x=350;foreshore.y=420}}if(!roadTrip&&scene==='foreshore'&&panel.style.display==='none'){const move=movementVector(dt);if(vanDrive.active){vanDrive.x=Math.max(35,Math.min(660,vanDrive.x+move.x*dt*DRIVE_SPEED));vanDrive.y=Math.max(730,Math.min(835,vanDrive.y+move.y*dt*DRIVE_SPEED));foreshore.x=vanDrive.x;foreshore.y=vanDrive.y;if(vanDrive.x<65){startRoadTrip('bush')}}else{foreshore.x=Math.max(35,Math.min(COAST_W-45,foreshore.x+move.x*dt*WALK_SPEED));foreshore.y=Math.max(50,Math.min(COAST_H-50,foreshore.y+move.y*dt*WALK_SPEED));}if(foreshore.x>700&&foreshore.x<JETTY_END-110){foreshore.y=Math.max(430,Math.min(470,foreshore.y))}if(foreshore.x>JETTY_END-200&&foreshore.x<JETTY_END+50){foreshoreFound.add('Jetty end');if(foreshore.x>JETTY_END-110)jettyWalked=true}if(foreshore.x>700&&foreshore.x<800)foreshoreFound.add('Jetty entrance')}if(!roadTrip&&!shops[scene]&&panel.style.display==='none'&&!vanDrive.active)followCompanions(dt);if(!roadTrip&&scene==='bush'&&panel.style.display==='none'){const move=movementVector(dt);player.x=Math.max(20,Math.min(W-20,player.x+move.x*dt*WALK_SPEED));player.y=Math.max(20,Math.min(H-20,player.y+move.y*dt*WALK_SPEED));if(dist(player,dog)>32){dog.x+=(player.x-dog.x)*Math.min(1,dt*.005);dog.y+=(player.y-dog.y)*Math.min(1,dt*.005)}}draw(t);netOverlay();netSend();if(scene==='bush'&&!roadTrip){ctx.fillStyle='#e9e1c9';ctx.font='bold 13px system-ui';ctx.fillText('ROAD EXIT ←  (walk to west edge, then Explore)',12,25)}requestAnimationFrame(frame)}if(scene==='foreshore'){companion.foreshore.k={x:foreshore.x-75,y:foreshore.y+16};companion.foreshore.a={x:foreshore.x+42,y:foreshore.y+25}}hud();setScene(scene);setInterval(save,3500);window.addEventListener('pagehide',()=>{save();cafeSave()});setInterval(cafeSave,5000);requestAnimationFrame(frame)})();
+function frame(t){const dt=Math.min(40,t-last||16);last=t;if(!roadTrip&&shops[scene]&&panel.style.display==='none'){const move=movementVector(dt);shopPos.x=Math.max(42,Math.min(595,shopPos.x+move.x*dt*WALK_SPEED));shopPos.y=Math.max(100,Math.min(410,shopPos.y+move.y*dt*WALK_SPEED));if(shopPos.x<145&&shopPos.y>396)leaveShop()}
+if(!roadTrip&&scene==='cafe'&&panel.style.display==='none'){const move=movementVector(dt);cafePos.x=Math.max(35,Math.min(570,cafePos.x+move.x*dt*WALK_SPEED));cafePos.y=Math.max(225,Math.min(395,cafePos.y+move.y*dt*WALK_SPEED));if(cafePos.x<125&&cafePos.y>365){setScene('foreshore');foreshore.x=350;foreshore.y=420}}if(!roadTrip&&scene==='foreshore'&&panel.style.display==='none'){const move=movementVector(dt);if(vanDrive.active){vanDrive.x=Math.max(35,Math.min(660,vanDrive.x+move.x*dt*DRIVE_SPEED));vanDrive.y=Math.max(730,Math.min(835,vanDrive.y+move.y*dt*DRIVE_SPEED));foreshore.x=vanDrive.x;foreshore.y=vanDrive.y;if(vanDrive.x<65){vanDrive.active=false;sharedTravelOffer('bush')}}else{foreshore.x=Math.max(35,Math.min(COAST_W-45,foreshore.x+move.x*dt*WALK_SPEED));foreshore.y=Math.max(50,Math.min(COAST_H-50,foreshore.y+move.y*dt*WALK_SPEED));}if(foreshore.x>700&&foreshore.x<JETTY_END-110){foreshore.y=Math.max(430,Math.min(470,foreshore.y))}if(foreshore.x>JETTY_END-200&&foreshore.x<JETTY_END+50){foreshoreFound.add('Jetty end');if(foreshore.x>JETTY_END-110)jettyWalked=true}if(foreshore.x>700&&foreshore.x<800)foreshoreFound.add('Jetty entrance')}if(!roadTrip&&!shops[scene]&&panel.style.display==='none'&&!vanDrive.active)followCompanions(dt);if(!roadTrip&&scene==='bush'&&panel.style.display==='none'){const move=movementVector(dt);player.x=Math.max(20,Math.min(W-20,player.x+move.x*dt*WALK_SPEED));player.y=Math.max(20,Math.min(H-20,player.y+move.y*dt*WALK_SPEED));if(dist(player,dog)>32){dog.x+=(player.x-dog.x)*Math.min(1,dt*.005);dog.y+=(player.y-dog.y)*Math.min(1,dt*.005)}}draw(t);netOverlay();netSend();if(scene==='bush'&&!roadTrip){ctx.fillStyle='#e9e1c9';ctx.font='bold 13px system-ui';ctx.fillText('ROAD EXIT ←  (walk to west edge, then Explore)',12,25)}requestAnimationFrame(frame)}if(scene==='foreshore'){companion.foreshore.k={x:foreshore.x-75,y:foreshore.y+16};companion.foreshore.a={x:foreshore.x+42,y:foreshore.y+25}}hud();setScene(scene);setInterval(save,3500);window.addEventListener('pagehide',()=>{save();cafeSave()});setInterval(cafeSave,5000);requestAnimationFrame(frame)})();
 </script></body></html>
