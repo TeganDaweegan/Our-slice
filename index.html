@@ -346,12 +346,25 @@ function handleBuildMessage(d){
  return true;
 }
 const buildHistory=[],buildRedo=[];
-function recordBuild(id,added){buildHistory.push({id,added});if(buildHistory.length>40)buildHistory.shift();buildRedo.length=0}
+function recordBuildChange(before,after){
+ const i=buildObjects.findIndex(o=>o.id===before.id);
+ if(i<0)return;
+ buildObjects[i]=after;
+ buildHistory.push({before:{...before},after:{...after}});
+ if(buildHistory.length>40)buildHistory.shift();
+ buildRedo.length=0;
+}
+function recordBuild(id,added){
+ const o=buildObjects.find(o=>o.id===id);if(!o)return;
+ const before={...o,deleted:added?true:false},after={...o,deleted:!added};
+ buildHistory.push({before,after});if(buildHistory.length>40)buildHistory.shift();buildRedo.length=0;
+}
 function undoBuild(redo=false){
  const from=redo?buildRedo:buildHistory,to=redo?buildHistory:buildRedo,change=from.pop();
  if(!change){say('Nothing to '+(redo?'redo':'undo')+'.');return}
- const i=buildObjects.findIndex(o=>o.id===change.id);if(i<0)return;
- buildObjects[i]={...buildObjects[i],deleted:redo?!change.added:change.added,at:Date.now()};
+ const i=buildObjects.findIndex(o=>o.id===change.after.id);
+ if(i<0)return;
+ buildObjects[i]={...(redo?change.after:change.before),at:Date.now()};
  to.push(change);saveBuild();sendBuildSync();say(redo?'Redone.':'Undone.');
 }
 function buildMenu(){
@@ -361,14 +374,14 @@ function buildMenu(){
  ['Furniture',buildCatalog.filter(c=>['bench','table','chair','sign'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Landscaping',buildCatalog.filter(c=>['firepit','lantern'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Gardening',buildCatalog.filter(c=>['garden','planter'].includes(c.id)).map(c=>[c.id,c.name])],
- ['Utilities',[['undo','Undo'],['redo','Redo'],['remove','Remove item']]]
+ ['Utilities',[['move','Move furniture'],['rotate','Rotate furniture 90°'],['undo','Undo'],['redo','Redo'],['remove','Remove item']]]
  ];
  const rows=categories.map(([name,items],i)=>'<details '+(i===0?'open':'')+'><summary style="padding:12px;font-weight:bold">'+name+'</summary>'+items.map(([id,label])=>'<button data-build-action="'+id+'">'+label+'</button>').join('')+'</details>').join('');
  open('Build / Decorate','<p>Choose a category. For rooms, tap one corner then the opposite corner. Rooms snap to a 40-pixel grid. Furniture placement remains free.</p>'+rows+'<small>Up to 40 objects; changes save locally and sync with your partner when connected.</small>');
  panel.querySelectorAll('[data-build-action]').forEach(b=>b.onclick=()=>{
  const kind=b.dataset.buildAction;
  if(kind==='undo'||kind==='redo'){undoBuild(kind==='redo');buildMenu();return}
- if(kind==='remove'){buildMode={remove:true};panel.style.display='none';say('Tap an item to remove it.');return}
+ if(['remove','move','rotate'].includes(kind)){buildMode={action:kind};panel.style.display='none';say(kind==='remove'?'Tap an item to remove it.':kind==='move'?'Tap the furniture you want to move.':'Tap furniture to rotate it 90 degrees.');return}
  if(buildObjects.filter(o=>!o.deleted).length>=40){say('Building limit reached.');return}
  buildMode={kind};panel.style.display='none';say(kind==='room'?'Tap the first corner of your room.':'Tap to place your item.');
  });
@@ -376,12 +389,31 @@ function buildMenu(){
 let buildMode=null;
 function placeDecoration(x,y){
  if(!buildMode)return false;
- if(buildMode.remove){
-  let best=-1,distBest=60;
-  buildObjects.forEach((o,i)=>{const d=Math.hypot(o.x-x,o.y-y);if(d<distBest){best=i;distBest=d}});
-  if(best<0){say('Tap closer to a decoration.');return true}
-  const o=buildObjects[best];buildObjects[best]={...o,at:Date.now(),deleted:true};recordBuild(o.id,false);
-  say('Decoration removed.');buildMode=null;saveBuild();sendBuildSync();return true;
+ if(buildMode.action){
+  if(buildMode.action==='move'&&buildMode.selected){
+   const o=buildObjects.find(o=>o.id===buildMode.selected);
+   if(!o||o.deleted){buildMode=null;say('That item is no longer available.');return true}
+   if(x<40||x>W-40||y<40||y>H-40||Math.hypot(x-660,y-590)<100){say('Choose a location within the property, away from the van.');return true}
+   recordBuildChange(o,{...o,x:Math.round(x),y:Math.round(y),at:Date.now()});
+   buildMode=null;saveBuild();sendBuildSync();say('Furniture moved.');return true;
+  }
+  let best=null,distBest=60;
+  for(const o of buildObjects){
+   if(o.deleted)continue;
+   const dx=o.kind==='room'?Math.max(o.x-x,0,x-(o.x+o.w)):o.x-x;
+   const dy=o.kind==='room'?Math.max(o.y-y,0,y-(o.y+o.h)):o.y-y;
+   const d=Math.hypot(dx,dy);
+   if(d<distBest){best=o;distBest=d}
+  }
+  if(!best){say('Tap closer to an item.');return true}
+  if(buildMode.action==='remove'){
+   recordBuildChange(best,{...best,at:Date.now(),deleted:true});
+   buildMode=null;saveBuild();sendBuildSync();say('Item removed.');return true;
+  }
+  if(best.kind==='room'){say('Choose furniture, not a room.');return true}
+  if(buildMode.action==='move'){buildMode.selected=best.id;say('Now tap where you want to move it.');return true}
+  recordBuildChange(best,{...best,rotation:((best.rotation||0)+90)%360,at:Date.now()});
+  buildMode=null;saveBuild();sendBuildSync();say('Furniture rotated.');return true;
  }
  if(buildMode.kind==='room'){
   const snap=v=>Math.round(v/40)*40,p={x:snap(x),y:snap(y)};
@@ -401,7 +433,7 @@ function drawDecorations(){
  for(const o of buildObjects){if(o.deleted)continue;
  const c=buildCatalog.find(c=>c.id===o.kind);if(!c)continue;
  if(o.kind==='room'){ctx.save();ctx.fillStyle='#cbb994';ctx.fillRect(o.x,o.y,o.w,o.h);ctx.strokeStyle='#715844';ctx.lineWidth=12;ctx.strokeRect(o.x+6,o.y+6,o.w-12,o.h-12);ctx.strokeStyle='#e6d8b6';ctx.lineWidth=2;ctx.strokeRect(o.x+12,o.y+12,o.w-24,o.h-24);ctx.restore();continue}
- ctx.save();ctx.translate(o.x,o.y);
+ ctx.save();ctx.translate(o.x,o.y);ctx.rotate((o.rotation||0)*Math.PI/180);
  ctx.fillStyle='#25382b66';ctx.beginPath();ctx.ellipse(0,8,25,9,0,0,Math.PI*2);ctx.fill();
  ctx.fillStyle=c.color;
  if(o.kind==='garden'){for(let j=-2;j<=2;j++){ctx.beginPath();ctx.arc(j*8,0,8,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#e8c88a';ctx.fillRect(-2,-6,4,5)}
