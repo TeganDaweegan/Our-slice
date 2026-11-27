@@ -28,8 +28,8 @@
 #panel.game-menu .menu-section button{font-size:14px;background:#54725c;padding:10px 13px}
 #panel.game-menu label{display:block;margin:12px 0;font-size:14px}
 #panel.game-menu input[type=checkbox]{width:19px;height:19px;vertical-align:middle;margin-right:9px}
-</style><script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" defer></script></head><body><header><strong>Our Slice · TEST VERSION</strong><span>Update 7.6 · separate test saves</span></header><div id="stage"><canvas id="view" width="640" height="450"></canvas></div><div id="msg">Tap to walk, or hold and drag your finger to steer. Your first date starts at Goose Café.</div><div id="hud"><span id="inventory">Backpack: empty</span><span id="found">Discoveries: 0 / 6</span></div><div id="controls"><div class="dpad" title="Optional directional controls"><button data-key="up">▲</button><button data-key="left">◀</button><button data-key="down">▼</button><button data-key="right">▶</button></div><div class="actions"><button id="explore">Talk to Maddie</button><button id="storage">Van storage</button><button id="camp">Set up camp</button><button id="build">Build / Decorate</button><button id="journal">Field journal</button><button id="backup">Save</button><button id="menu">Menu</button><button id="travel">Travel</button></div></div><div id="panel"></div><script>
-// Preview data is isolated from the live game on the same GitHub Pages origin.
+</style><script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" defer></script></head><body><header><strong>Our Slice · TEST VERSION</strong><span>Update 7.6 · separate test saves · build 3</span></header><div id="stage"><canvas id="view" width="640" height="450"></canvas></div><div id="msg">Tap to walk, or hold and drag your finger to steer. Your first date starts at Goose Café.</div><div id="hud"><span id="inventory">Backpack: empty</span><span id="found">Discoveries: 0 / 6</span></div><div id="controls"><div class="dpad" title="Optional directional controls"><button data-key="up">▲</button><button data-key="left">◀</button><button data-key="down">▼</button><button data-key="right">▶</button></div><div class="actions"><button id="explore">Talk to Maddie</button><button id="storage">Van storage</button><button id="camp">Set up camp</button><button id="build">Build / Decorate</button><button id="journal">Field journal</button><button id="backup">Save</button><button id="menu">Menu</button><button id="travel">Travel</button></div></div><div id="panel"></div><script>
+// Keep preview saves separate from the live game.
 const testStorage={
  getItem:key=>window.localStorage.getItem('our-slice-preview-7-6::'+key),
  setItem:(key,value)=>window.localStorage.setItem('our-slice-preview-7-6::'+key,value),
@@ -392,14 +392,14 @@ function buildMenu(){
  ['Furniture',buildCatalog.filter(c=>['bench','table','chair','sign'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Landscaping',buildCatalog.filter(c=>['firepit','lantern'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Gardening',buildCatalog.filter(c=>['garden','planter'].includes(c.id)).map(c=>[c.id,c.name])],
- ['Utilities',[['move','Move furniture'],['rotate','Rotate furniture 90°'],['undo','Undo'],['redo','Redo'],['remove','Remove item']]]
+ ['Utilities',[['move','Move furniture'],['rotate','Rotate furniture 90°'],['undo','Undo'],['redo','Redo'],['remove','Remove item or room'],['remove-opening','Remove door or window']]]
  ];
  const rows=categories.map(([name,items],i)=>'<details '+(i===0?'open':'')+'><summary style="padding:12px;font-weight:bold">'+name+'</summary>'+items.map(([id,label])=>'<button data-build-action="'+id+'">'+label+'</button>').join('')+'</details>').join('');
- open('Build / Decorate','<p>Choose a category. For rooms, tap one corner then the opposite corner. Rooms snap to a 40-pixel grid. Furniture placement remains free.</p>'+rows+'<small>Up to 40 objects; changes save locally and sync with your partner when connected.</small>');
+ open('Build / Decorate','<p>Choose a category. For rooms, tap one corner then the opposite corner. Rooms snap to a finer 20-pixel grid. The first corner stays marked while you choose the second. Furniture placement remains free.</p>'+rows+'<small>Up to 40 objects; changes save locally and sync with your partner when connected.</small>');
  panel.querySelectorAll('[data-build-action]').forEach(b=>b.onclick=()=>{
  const kind=b.dataset.buildAction;
  if(kind==='undo'||kind==='redo'){undoBuild(kind==='redo');buildMenu();return}
- if(['remove','move','rotate','door','window','material','floor'].includes(kind)){buildMode={action:kind};panel.style.display='none';say(kind==='remove'?'Tap an item to remove it.':kind==='move'?'Tap the furniture you want to move.':kind==='rotate'?'Tap furniture to rotate it 90 degrees.':kind==='material'||kind==='floor'?'Tap a room to change its '+(kind==='material'?'walls.':'floor.'):'Tap near the wall where you want a '+kind+'.');return}
+ if(['remove','remove-opening','move','rotate','door','window','material','floor'].includes(kind)){buildMode={action:kind};panel.style.display='none';say(kind==='remove'?'Tap furniture or inside a room to remove it.':kind==='remove-opening'?'Tap near a door or window to remove it.':kind==='move'?'Tap the furniture you want to move.':kind==='rotate'?'Tap furniture to rotate it 90 degrees.':kind==='material'||kind==='floor'?'Tap a room to change its '+(kind==='material'?'walls.':'floor.'):'Tap near the wall where you want a '+kind+'.');return}
  if(buildObjects.filter(o=>!o.deleted).length>=40){say('Building limit reached.');return}
  buildMode={kind};panel.style.display='none';say(kind==='room'?'Tap the first corner of your room.':'Tap to place your item.');
  });
@@ -409,6 +409,7 @@ function placeDecoration(x,y){
  if(!buildMode)return false;
  if(buildMode.action){
   if(buildMode.action==='door'||buildMode.action==='window')return placeOpening(x,y,buildMode.action);
+  if(buildMode.action==='remove-opening')return removeOpening(x,y);
   if(buildMode.action==='material'||buildMode.action==='floor')return selectRoomFinish(x,y,buildMode.action);
   if(buildMode.action==='move'&&buildMode.selected){
    const o=buildObjects.find(o=>o.id===buildMode.selected);
@@ -417,13 +418,15 @@ function placeDecoration(x,y){
    recordBuildChange(o,{...o,x:Math.round(x),y:Math.round(y),at:Date.now()});
    buildMode=null;saveBuild();sendBuildSync();say('Furniture moved.');return true;
   }
-  let best=null,distBest=60;
-  for(const o of buildObjects){
-   if(o.deleted)continue;
-   const dx=o.kind==='room'?Math.max(o.x-x,0,x-(o.x+o.w)):o.x-x;
-   const dy=o.kind==='room'?Math.max(o.y-y,0,y-(o.y+o.h)):o.y-y;
-   const d=Math.hypot(dx,dy);
+  // Prefer a nearby furniture item over the room underneath it.
+  let best=null,distBest=42;
+  for(const o of [...buildObjects].reverse()){
+   if(o.deleted||o.kind==='room')continue;
+   const d=Math.hypot(o.x-x,o.y-y);
    if(d<distBest){best=o;distBest=d}
+  }
+  if(!best&&buildMode.action==='remove'){
+   best=[...buildObjects].reverse().find(o=>!o.deleted&&o.kind==='room'&&x>=o.x&&x<=o.x+o.w&&y>=o.y&&y<=o.y+o.h)||null;
   }
   if(!best){say('Tap closer to an item.');return true}
   if(buildMode.action==='remove'){
@@ -436,8 +439,8 @@ function placeDecoration(x,y){
   buildMode=null;saveBuild();sendBuildSync();say('Furniture rotated.');return true;
  }
  if(buildMode.kind==='room'){
-  const snap=v=>Math.round(v/40)*40,p={x:snap(x),y:snap(y)};
-  if(!buildMode.corner){buildMode.corner=p;say('Tap the opposite corner.');return true}
+  const snap=v=>Math.round(v/20)*20,p={x:snap(x),y:snap(y)};
+  if(!buildMode.corner){buildMode.corner=p;say('First corner marked. Tap the opposite corner.');return true}
   const a=buildMode.corner,left=Math.min(a.x,p.x),top=Math.min(a.y,p.y),w=Math.abs(a.x-p.x),h=Math.abs(a.y-p.y);
   if(w<40||h<40||left<40||top<40||left+w>W-40||top+h>H-40||Math.hypot(left+w/2-660,top+h/2-590)<110){say('Choose a room at least one grid square wide, inside the property and away from the van.');return true}
   const id=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
@@ -476,6 +479,22 @@ function placeOpening(x,y,kind){
  }
  const next={...room,openings:[...openings,{side,pos,kind}],at:Date.now()};
  recordBuildChange(room,next);buildMode=null;saveBuild();sendBuildSync();say(kind==='door'?'Door added.':'Window added.');return true;
+}
+function removeOpening(x,y){
+ let best=null,dist=24;
+ for(const room of buildObjects){
+  if(room.deleted||room.kind!=='room'||!Array.isArray(room.openings))continue;
+  for(let i=0;i<room.openings.length;i++){
+   const o=room.openings[i],px=room.x+(o.side==='left'?0:o.side==='right'?room.w:o.pos);
+   const py=room.y+(o.side==='top'?0:o.side==='bottom'?room.h:o.pos);
+   const d=Math.hypot(px-x,py-y);
+   if(d<dist){dist=d;best={room,index:i}}
+  }
+ }
+ if(!best){say('Tap closer to the door or window you want to remove.');return true}
+ const {room,index}=best;
+ recordBuildChange(room,{...room,openings:room.openings.filter((_,i)=>i!==index),at:Date.now()});
+ buildMode=null;saveBuild();sendBuildSync();say('Opening removed.');return true;
 }
 function selectRoomFinish(x,y,property){
  const room=[...buildObjects].reverse().find(o=>!o.deleted&&o.kind==='room'&&x>=o.x&&x<=o.x+o.w&&y>=o.y&&y<=o.y+o.h);
@@ -557,6 +576,18 @@ function drawRoom(room){
    cursor=end;
   }
   wall(cursor,length);
+ }
+ ctx.restore();
+}
+function drawBuildGuides(){
+ if(!buildMode||buildMode.kind!=='room'||!buildMode.corner)return;
+ const a=buildMode.corner;
+ ctx.save();ctx.strokeStyle='#fff5b8';ctx.lineWidth=3;
+ ctx.beginPath();ctx.arc(a.x,a.y,10,0,Math.PI*2);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(a.x-16,a.y);ctx.lineTo(a.x+16,a.y);ctx.moveTo(a.x,a.y-16);ctx.lineTo(a.x,a.y+16);ctx.stroke();
+ if(buildMode.hover){
+  const b=buildMode.hover;
+  ctx.setLineDash([8,6]);ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(a.x-b.x),Math.abs(a.y-b.y));
  }
  ctx.restore();
 }
@@ -714,7 +745,7 @@ ctx.fillStyle='#f8edcf';ctx.font='bold 19px system-ui';ctx.fillText(roadTrip.to=
 ctx.font='14px system-ui';ctx.fillText('Road trip · '+(netRole==='guest'?'Kieran':'Tegan')+' and Aggie',15,55);
 if(p>=1)finishRoadTrip();
 }
-function draw(t){if(roadTrip){drawRoadTrip(t);return}if(shops[scene]){drawShop();return}if(scene==='foreshore'){drawForeshore(t);return}if(scene==='cafe'){drawCafe(t);return}const w=canvas.width,h=canvas.height;camera.x=Math.max(0,Math.min(W-w,player.x-w/2));camera.y=Math.max(0,Math.min(H-h,player.y-h/2));ctx.clearRect(0,0,w,h);ctx.save();ctx.translate(-camera.x,-camera.y);ctx.fillStyle='#a1b183';ctx.fillRect(0,0,W,H);for(let i=0;i<900;i++){const x=(i*193+41)%W,y=(i*317+37)%H;ellipse(x,y,2+(i%4),2,'#8fa879')}line([[0,680],[260,665],[420,630],[600,620],[800,610],[1020,590],[1370,560],[1900,520]],'#c2ad86',62);line([[160,1450],[320,1290],[590,1180],[830,1040],[970,880],[1060,690],[1170,460],[1260,240],[1390,0]],'#7ea8a5',45);line([[160,1450],[320,1290],[590,1180],[830,1040],[970,880],[1060,690],[1170,460],[1260,240],[1390,0]],'#b0c5ad',3);line([[380,670],[390,820],[425,960],[600,1080],[760,1200]],'#b4a184',17);for(let i=0;i<145;i++){const x=(i*271+87)%W,y=(i*197+101)%H;if(Math.hypot(x-660,y-590)<145||Math.hypot(x-1510,y-770)<100||Math.abs(y-(670-x*.07))<45)continue;tree(x,y,.7+(i%5)*.15)}for(let i=0;i<260;i++){const x=(i*383+81)%W,y=(i*227+113)%H;if(Math.hypot(x-660,y-590)<100)continue;if(i%4===0)shrub(x,y,.55+(i%3)*.18);else grass(x,y)}fallenLog(720,850);fallenLog(1290,1000);ellipse(1100,440,95,60,'#979487');ellipse(1080,425,52,33,'#b5b0a1');ellipse(1510,770,130,95,'#b4b38d');for(let i=0;i<17;i++){const a=i*2.399,rad=17+(i*31)%87;ellipse(1100+Math.cos(a)*rad,440+Math.sin(a)*rad*.57,3+(i%4),2+(i%3),'#878578')}van();drawDecorations();for(let i=0;i<finds.length;i++){if(taken.has(i))continue;const o=finds[i];ellipse(o.x,o.y,8,5,'#b58c56');ellipse(o.x,o.y-4,3,3,'#eee0b5')}for(const s of spots){ctx.fillStyle='#273f31bb';ctx.fillRect(s.x-47,s.y-89,94,19);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='12px system-ui';ctx.fillText(s.n,s.x,s.y-75)}const bx=1100+Math.sin(t*.0005)*120,by=330+Math.sin(t*.002)*12;ctx.fillStyle='#313d34';ctx.beginPath();ctx.moveTo(bx-12,by);ctx.lineTo(bx,by-6);ctx.lineTo(bx+12,by);ctx.lineTo(bx,by+5);ctx.fill();ellipse(dog.x,dog.y,16,9,'#352b2b');ctx.fillStyle='#252323';ctx.beginPath();ctx.moveTo(dog.x+5,dog.y-4);ctx.lineTo(dog.x+8,dog.y-24);ctx.lineTo(dog.x+15,dog.y-4);ctx.fill();ellipse(dog.x+12,dog.y-4,7,7,'#302829');ctx.fillStyle='#e3e1d5';ctx.fillRect(dog.x-10,dog.y+4,5,10);ctx.fillRect(dog.x+8,dog.y+4,5,10);line([[dog.x-15,dog.y],[dog.x-25,dog.y-12]],'#302829',4);drawPerson(player.x,player.y,netRole==='guest'?'#3d6665':'#ad5967','#6e503b',netRole!=='guest');ctx.fillStyle='#fffbe8';ctx.strokeStyle='#203f2b';ctx.lineWidth=3;ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.strokeText(netRole==='guest'?'Kieran':'Tegan',player.x,player.y-48);ctx.fillText(netRole==='guest'?'Kieran':'Tegan',player.x,player.y-48);ctx.textAlign='left';ctx.restore();if(t-swear>12000&&Math.hypot(dog.x-bx,dog.y-by)<280){swear=t;say('Aggie: WOOF! ... Fuck!')}}const WALK_SPEED=.19,DRIVE_SPEED=.55;
+function draw(t){if(roadTrip){drawRoadTrip(t);return}if(shops[scene]){drawShop();return}if(scene==='foreshore'){drawForeshore(t);return}if(scene==='cafe'){drawCafe(t);return}const w=canvas.width,h=canvas.height;camera.x=Math.max(0,Math.min(W-w,player.x-w/2));camera.y=Math.max(0,Math.min(H-h,player.y-h/2));ctx.clearRect(0,0,w,h);ctx.save();ctx.translate(-camera.x,-camera.y);ctx.fillStyle='#a1b183';ctx.fillRect(0,0,W,H);for(let i=0;i<900;i++){const x=(i*193+41)%W,y=(i*317+37)%H;ellipse(x,y,2+(i%4),2,'#8fa879')}line([[0,680],[260,665],[420,630],[600,620],[800,610],[1020,590],[1370,560],[1900,520]],'#c2ad86',62);line([[160,1450],[320,1290],[590,1180],[830,1040],[970,880],[1060,690],[1170,460],[1260,240],[1390,0]],'#7ea8a5',45);line([[160,1450],[320,1290],[590,1180],[830,1040],[970,880],[1060,690],[1170,460],[1260,240],[1390,0]],'#b0c5ad',3);line([[380,670],[390,820],[425,960],[600,1080],[760,1200]],'#b4a184',17);for(let i=0;i<145;i++){const x=(i*271+87)%W,y=(i*197+101)%H;if(Math.hypot(x-660,y-590)<145||Math.hypot(x-1510,y-770)<100||Math.abs(y-(670-x*.07))<45)continue;tree(x,y,.7+(i%5)*.15)}for(let i=0;i<260;i++){const x=(i*383+81)%W,y=(i*227+113)%H;if(Math.hypot(x-660,y-590)<100)continue;if(i%4===0)shrub(x,y,.55+(i%3)*.18);else grass(x,y)}fallenLog(720,850);fallenLog(1290,1000);ellipse(1100,440,95,60,'#979487');ellipse(1080,425,52,33,'#b5b0a1');ellipse(1510,770,130,95,'#b4b38d');for(let i=0;i<17;i++){const a=i*2.399,rad=17+(i*31)%87;ellipse(1100+Math.cos(a)*rad,440+Math.sin(a)*rad*.57,3+(i%4),2+(i%3),'#878578')}van();drawDecorations();drawBuildGuides();for(let i=0;i<finds.length;i++){if(taken.has(i))continue;const o=finds[i];ellipse(o.x,o.y,8,5,'#b58c56');ellipse(o.x,o.y-4,3,3,'#eee0b5')}for(const s of spots){ctx.fillStyle='#273f31bb';ctx.fillRect(s.x-47,s.y-89,94,19);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='12px system-ui';ctx.fillText(s.n,s.x,s.y-75)}const bx=1100+Math.sin(t*.0005)*120,by=330+Math.sin(t*.002)*12;ctx.fillStyle='#313d34';ctx.beginPath();ctx.moveTo(bx-12,by);ctx.lineTo(bx,by-6);ctx.lineTo(bx+12,by);ctx.lineTo(bx,by+5);ctx.fill();ellipse(dog.x,dog.y,16,9,'#352b2b');ctx.fillStyle='#252323';ctx.beginPath();ctx.moveTo(dog.x+5,dog.y-4);ctx.lineTo(dog.x+8,dog.y-24);ctx.lineTo(dog.x+15,dog.y-4);ctx.fill();ellipse(dog.x+12,dog.y-4,7,7,'#302829');ctx.fillStyle='#e3e1d5';ctx.fillRect(dog.x-10,dog.y+4,5,10);ctx.fillRect(dog.x+8,dog.y+4,5,10);line([[dog.x-15,dog.y],[dog.x-25,dog.y-12]],'#302829',4);drawPerson(player.x,player.y,netRole==='guest'?'#3d6665':'#ad5967','#6e503b',netRole!=='guest');ctx.fillStyle='#fffbe8';ctx.strokeStyle='#203f2b';ctx.lineWidth=3;ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.strokeText(netRole==='guest'?'Kieran':'Tegan',player.x,player.y-48);ctx.fillText(netRole==='guest'?'Kieran':'Tegan',player.x,player.y-48);ctx.textAlign='left';ctx.restore();if(t-swear>12000&&Math.hypot(dog.x-bx,dog.y-by)<280){swear=t;say('Aggie: WOOF! ... Fuck!')}}const WALK_SPEED=.19,DRIVE_SPEED=.55;
 const touchMove={active:false,pointerId:null,goal:null,velocity:{x:0,y:0}};
 function controlledPosition(){if(shops[scene])return shopPos;if(scene==='cafe')return cafePos;if(scene==='foreshore')return vanDrive.active?vanDrive:foreshore;return player}
 function touchWorldPosition(e){
@@ -732,10 +763,11 @@ function cancelTouchMovement(){touchMove.active=false;touchMove.pointerId=null;t
 canvas.addEventListener('pointerdown',e=>{
  if(panel.style.display!=='none'||roadTrip)return;
  if(e.pointerType==='mouse'&&e.button!==0)return;
- e.preventDefault();if(scene==='bush'&&buildMode){placeDecoration(touchWorldPosition(e).x,touchWorldPosition(e).y);return}touchMove.active=true;touchMove.pointerId=e.pointerId;
+ e.preventDefault();if(scene==='bush'&&buildMode){const p=touchWorldPosition(e);placeDecoration(p.x,p.y);return}touchMove.active=true;touchMove.pointerId=e.pointerId;
  touchMove.goal=touchWorldPosition(e);canvas.setPointerCapture(e.pointerId);
 });
 canvas.addEventListener('pointermove',e=>{
+ if(scene==='bush'&&buildMode&&buildMode.kind==='room'&&buildMode.corner){const p=touchWorldPosition(e);buildMode.hover={x:Math.round(p.x/20)*20,y:Math.round(p.y/20)*20}}
  if(touchMove.active&&touchMove.pointerId===e.pointerId){e.preventDefault();touchMove.goal=touchWorldPosition(e)}
 });
 canvas.addEventListener('pointerup',e=>{
