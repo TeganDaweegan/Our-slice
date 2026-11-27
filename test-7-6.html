@@ -28,7 +28,7 @@
 #panel.game-menu .menu-section button{font-size:14px;background:#54725c;padding:10px 13px}
 #panel.game-menu label{display:block;margin:12px 0;font-size:14px}
 #panel.game-menu input[type=checkbox]{width:19px;height:19px;vertical-align:middle;margin-right:9px}
-</style><script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" defer></script></head><body><header><strong>Our Slice · TEST VERSION</strong><span>Update 7.6 · separate test saves · build 3</span></header><div id="stage"><canvas id="view" width="640" height="450"></canvas></div><div id="msg">Tap to walk, or hold and drag your finger to steer. Your first date starts at Goose Café.</div><div id="hud"><span id="inventory">Backpack: empty</span><span id="found">Discoveries: 0 / 6</span></div><div id="controls"><div class="dpad" title="Optional directional controls"><button data-key="up">▲</button><button data-key="left">◀</button><button data-key="down">▼</button><button data-key="right">▶</button></div><div class="actions"><button id="explore">Talk to Maddie</button><button id="storage">Van storage</button><button id="camp">Set up camp</button><button id="build">Build / Decorate</button><button id="journal">Field journal</button><button id="backup">Save</button><button id="menu">Menu</button><button id="travel">Travel</button></div></div><div id="panel"></div><script>
+</style><script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" defer></script></head><body><header><strong>Our Slice · TEST VERSION</strong><span>Update 7.6 · separate test saves · build 4</span></header><div id="stage"><canvas id="view" width="640" height="450"></canvas></div><div id="msg">Tap to walk, or hold and drag your finger to steer. Your first date starts at Goose Café.</div><div id="hud"><span id="inventory">Backpack: empty</span><span id="found">Discoveries: 0 / 6</span></div><div id="controls"><div class="dpad" title="Optional directional controls"><button data-key="up">▲</button><button data-key="left">◀</button><button data-key="down">▼</button><button data-key="right">▶</button></div><div class="actions"><button id="explore">Talk to Maddie</button><button id="storage">Van storage</button><button id="camp">Set up camp</button><button id="build">Build / Decorate</button><button id="journal">Field journal</button><button id="backup">Save</button><button id="menu">Menu</button><button id="travel">Travel</button></div></div><div id="panel"></div><script>
 // Keep preview saves separate from the live game.
 const testStorage={
  getItem:key=>window.localStorage.getItem('our-slice-preview-7-6::'+key),
@@ -363,19 +363,29 @@ function handleBuildMessage(d){
  if(changed){saveBuild();say('Decorations synced from the other player.')}
  return true;
 }
+const BUILD_HISTORY_KEY='our-slice-build-history-v1';
 const buildHistory=[],buildRedo=[];
+try{
+ const h=JSON.parse(testStorage.getItem(BUILD_HISTORY_KEY)||'{}');
+ const validChange=c=>c&&validBuild(c.before)&&validBuild(c.after)&&c.before.id===c.after.id;
+ if(Array.isArray(h.undo))buildHistory.push(...h.undo.filter(validChange).slice(-40));
+ if(Array.isArray(h.redo))buildRedo.push(...h.redo.filter(validChange).slice(-40));
+}catch{}
+function saveBuildHistory(){
+ try{testStorage.setItem(BUILD_HISTORY_KEY,JSON.stringify({undo:buildHistory,redo:buildRedo}))}catch{}
+}
 function recordBuildChange(before,after){
  const i=buildObjects.findIndex(o=>o.id===before.id);
  if(i<0)return;
  buildObjects[i]=after;
  buildHistory.push({before:{...before},after:{...after}});
  if(buildHistory.length>40)buildHistory.shift();
- buildRedo.length=0;
+ buildRedo.length=0;saveBuildHistory();
 }
 function recordBuild(id,added){
  const o=buildObjects.find(o=>o.id===id);if(!o)return;
  const before={...o,deleted:added?true:false},after={...o,deleted:!added};
- buildHistory.push({before,after});if(buildHistory.length>40)buildHistory.shift();buildRedo.length=0;
+ buildHistory.push({before,after});if(buildHistory.length>40)buildHistory.shift();buildRedo.length=0;saveBuildHistory();
 }
 function undoBuild(redo=false){
  const from=redo?buildRedo:buildHistory,to=redo?buildHistory:buildRedo,change=from.pop();
@@ -383,7 +393,7 @@ function undoBuild(redo=false){
  const i=buildObjects.findIndex(o=>o.id===change.after.id);
  if(i<0)return;
  buildObjects[i]={...(redo?change.after:change.before),at:Date.now()};
- to.push(change);saveBuild();sendBuildSync();say(redo?'Redone.':'Undone.');
+ to.push(change);saveBuild();saveBuildHistory();sendBuildSync();say((redo?'Redone. ':'Undone. ')+(redo?buildRedo.length:buildHistory.length)+' more available.');
 }
 function buildMenu(){
  if(scene!=='bush'){say('Travel to Our Slice to build and decorate.');return}
@@ -392,7 +402,7 @@ function buildMenu(){
  ['Furniture',buildCatalog.filter(c=>['bench','table','chair','sign'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Landscaping',buildCatalog.filter(c=>['firepit','lantern'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Gardening',buildCatalog.filter(c=>['garden','planter'].includes(c.id)).map(c=>[c.id,c.name])],
- ['Utilities',[['move','Move furniture'],['rotate','Rotate furniture 90°'],['undo','Undo'],['redo','Redo'],['remove','Remove item or room'],['remove-opening','Remove door or window']]]
+ ['Utilities',[['move','Move furniture'],['rotate','Rotate furniture 90°'],['undo','Undo ('+buildHistory.length+' available)'],['redo','Redo ('+buildRedo.length+' available)'],['remove','Remove item or room'],['remove-opening','Remove door or window']]]
  ];
  const rows=categories.map(([name,items],i)=>'<details '+(i===0?'open':'')+'><summary style="padding:12px;font-weight:bold">'+name+'</summary>'+items.map(([id,label])=>'<button data-build-action="'+id+'">'+label+'</button>').join('')+'</details>').join('');
  open('Build / Decorate','<p>Choose a category. For rooms, tap one corner then the opposite corner. Rooms snap to a finer 20-pixel grid. The first corner stays marked while you choose the second. Furniture placement remains free.</p>'+rows+'<small>Up to 40 objects; changes save locally and sync with your partner when connected.</small>');
