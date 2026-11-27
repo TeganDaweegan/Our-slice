@@ -357,19 +357,29 @@ function handleBuildMessage(d){
  if(changed){saveBuild();say('Decorations synced from the other player.')}
  return true;
 }
+const BUILD_HISTORY_KEY='our-slice-build-history-v1';
 const buildHistory=[],buildRedo=[];
+try{
+ const h=JSON.parse(localStorage.getItem(BUILD_HISTORY_KEY)||'{}');
+ const validChange=c=>c&&validBuild(c.before)&&validBuild(c.after)&&c.before.id===c.after.id;
+ if(Array.isArray(h.undo))buildHistory.push(...h.undo.filter(validChange).slice(-40));
+ if(Array.isArray(h.redo))buildRedo.push(...h.redo.filter(validChange).slice(-40));
+}catch{}
+function saveBuildHistory(){
+ try{localStorage.setItem(BUILD_HISTORY_KEY,JSON.stringify({undo:buildHistory,redo:buildRedo}))}catch{}
+}
 function recordBuildChange(before,after){
  const i=buildObjects.findIndex(o=>o.id===before.id);
  if(i<0)return;
  buildObjects[i]=after;
  buildHistory.push({before:{...before},after:{...after}});
  if(buildHistory.length>40)buildHistory.shift();
- buildRedo.length=0;
+ buildRedo.length=0;saveBuildHistory();
 }
 function recordBuild(id,added){
  const o=buildObjects.find(o=>o.id===id);if(!o)return;
  const before={...o,deleted:added?true:false},after={...o,deleted:!added};
- buildHistory.push({before,after});if(buildHistory.length>40)buildHistory.shift();buildRedo.length=0;
+ buildHistory.push({before,after});if(buildHistory.length>40)buildHistory.shift();buildRedo.length=0;saveBuildHistory();
 }
 function undoBuild(redo=false){
  const from=redo?buildRedo:buildHistory,to=redo?buildHistory:buildRedo,change=from.pop();
@@ -377,7 +387,7 @@ function undoBuild(redo=false){
  const i=buildObjects.findIndex(o=>o.id===change.after.id);
  if(i<0)return;
  buildObjects[i]={...(redo?change.after:change.before),at:Date.now()};
- to.push(change);saveBuild();sendBuildSync();say(redo?'Redone.':'Undone.');
+ to.push(change);saveBuild();saveBuildHistory();sendBuildSync();say((redo?'Redone. ':'Undone. ')+(redo?buildRedo.length:buildHistory.length)+' more available.');
 }
 function buildMenu(){
  if(scene!=='bush'){say('Travel to Our Slice to build and decorate.');return}
@@ -386,7 +396,7 @@ function buildMenu(){
  ['Furniture',buildCatalog.filter(c=>['bench','table','chair','sign'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Landscaping',buildCatalog.filter(c=>['firepit','lantern'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Gardening',buildCatalog.filter(c=>['garden','planter'].includes(c.id)).map(c=>[c.id,c.name])],
- ['Utilities',[['move','Move furniture'],['rotate','Rotate furniture 90°'],['undo','Undo'],['redo','Redo'],['remove','Remove item or room'],['remove-opening','Remove door or window']]]
+ ['Utilities',[['move','Move furniture'],['rotate','Rotate furniture 90°'],['undo','Undo ('+buildHistory.length+' available)'],['redo','Redo ('+buildRedo.length+' available)'],['remove','Remove item or room'],['remove-opening','Remove door or window']]]
  ];
  const rows=categories.map(([name,items],i)=>'<details '+(i===0?'open':'')+'><summary style="padding:12px;font-weight:bold">'+name+'</summary>'+items.map(([id,label])=>'<button data-build-action="'+id+'">'+label+'</button>').join('')+'</details>').join('');
  open('Build / Decorate','<p>Choose a category. For rooms, tap one corner then the opposite corner. Rooms snap to a finer 20-pixel grid. The first corner stays marked while you choose the second. Furniture placement remains free.</p>'+rows+'<small>Up to 40 objects; changes save locally and sync with your partner when connected.</small>');
