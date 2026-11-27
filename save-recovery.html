@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Our Slice — Save Recovery</title><style>body{font:16px system-ui;background:#15251e;color:#f3f3ed;max-width:650px;margin:auto;padding:22px}button{font:inherit;padding:12px;margin:8px 5px 8px 0;border:0;border-radius:7px}article{border:1px solid #5c7365;padding:12px;margin:10px 0;border-radius:8px}small{color:#c8d9ce}pre{white-space:pre-wrap;overflow-wrap:anywhere}strong{color:#fff}</style></head><body><h1>Our Slice — Save Recovery</h1><p>This page only reads saved browser data. It will not create a new game, replace, delete or modify any saves.</p><p>Use the same browser and browser mode in which you played Update 7.7.</p><button id="scan">Scan saved progress</button><button id="export" disabled>Export all found data</button><div id="results" aria-live="polite"></div><script>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Our Slice — Save Recovery</title><style>body{font:16px system-ui;background:#15251e;color:#f3f3ed;max-width:650px;margin:auto;padding:22px}button{font:inherit;padding:12px;margin:8px 5px 8px 0;border:0;border-radius:7px}article{border:1px solid #5c7365;padding:12px;margin:10px 0;border-radius:8px}small{color:#c8d9ce}pre{white-space:pre-wrap;overflow-wrap:anywhere}strong{color:#fff}</style></head><body><h1>Our Slice — Save Recovery</h1><p>This page only reads saved browser data. It will not create a new game, replace, delete or modify any saves.</p><p>Use the same browser and browser mode in which you played Update 7.7.</p><button id="scan">Scan saved progress</button><button id="export" disabled>Export all found data</button><div id="results" aria-live="polite"></div><article><h2>Restore access to saved chapters</h2><p>This imports your recovery backup into the Update 7.7 test save area. Original game saves are not changed. The current 7.7 progress is preserved as its own named chapter, alongside copies of your older chapters.</p><input id="recovery-file" type="file" accept=".json,application/json"><button id="preview-import">Check backup file</button><div id="import-status" aria-live="polite"></div><button id="apply-import" disabled>Restore chapters to Update 7.7</button></article><script>
 const prefix='our-slice-preview-7-7::';
 const names=['our-slice-bush-v2','our-slice-cafe-v1','our-slice-foreshore-v1','our-slice-build-v1','our-slice-economy-77','our-slice-save-slots-v1'];
 let found={};
@@ -26,4 +26,48 @@ function scan(){
 }
 document.getElementById('scan').onclick=scan;
 document.getElementById('export').onclick=()=>{const blob=new Blob([JSON.stringify({format:'our-slice-raw-recovery',created:new Date().toISOString(),entries:found},null,2)],{type:'application/json'});const a=document.createElement('a');const url=URL.createObjectURL(blob);a.href=url;a.download='our-slice-recovery-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)};
+
+let checkedRecovery=null;
+document.getElementById('preview-import').onclick=async()=>{
+ const status=document.getElementById('import-status');const file=document.getElementById('recovery-file').files[0];
+ checkedRecovery=null;document.getElementById('apply-import').disabled=true;
+ if(!file){status.textContent='Choose your downloaded recovery JSON file first.';return}
+ try{
+  if(file.size>1000000)throw Error('File too large');
+  const data=JSON.parse(await file.text());
+  if(data.format!=='our-slice-raw-recovery'||!data.entries||typeof data.entries!=='object')throw Error('Not an Our Slice recovery backup');
+  const e=data.entries,p='our-slice-preview-7-7::';
+  const bush=JSON.parse(e[p+'our-slice-bush-v2']||'null'),economy=JSON.parse(e[p+'our-slice-economy-77']||'null'),old=JSON.parse(e['our-slice-save-slots-v1']||'[]');
+  if(!bush||!economy||!Array.isArray(old))throw Error('Missing progress data');
+  checkedRecovery={entries:e,bush,economy,old};
+  status.textContent='Backup verified: '+old.length+' older chapters, '+economy.vanTimber+' timber in HiAce, '+economy.money+' dollars. The current 7.7 progress will also become a chapter.';
+  document.getElementById('apply-import').disabled=false;
+ }catch(err){status.textContent='Could not verify backup: '+err.message}
+};
+document.getElementById('apply-import').onclick=()=>{
+ if(!checkedRecovery)return;
+ const p='our-slice-preview-7-7::',e=checkedRecovery.entries,status=document.getElementById('import-status');
+ if(!confirm('Make saved chapters available in Update 7.7? This will not replace your active game or change the original game saves.'))return;
+ try{
+  const current={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(p))current[k]=localStorage.getItem(k)}
+  const backup={format:'our-slice-raw-recovery',created:new Date().toISOString(),entries:current};
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='our-slice-before-restore-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);
+  const get=(key,fallback)=>JSON.parse(current[p+key]||e[p+key]||JSON.stringify(fallback));
+  const chapters=get('our-slice-save-slots-v1',[]);
+  if(!Array.isArray(chapters))throw Error('Existing chapter list is invalid');
+  const currentChapter={name:'Update 7.7 progress (recovered)',date:new Date().toLocaleString(),data:{
+   format:'our-slice-backup',version:1,created:new Date().toISOString(),
+   bush:get('our-slice-bush-v2',checkedRecovery.bush),
+   cafe:get('our-slice-cafe-v1',{}),foreshore:get('our-slice-foreshore-v1',{}),
+   build:get('our-slice-build-v1',[]),economy77:get('our-slice-economy-77',checkedRecovery.economy)
+  }};
+  const known=new Set(chapters.map(x=>x.name));
+  if(!known.has(currentChapter.name))chapters.unshift(currentChapter);
+  for(const x of checkedRecovery.old){const name='Earlier game: '+x.name;if(!known.has(name)&&x.data&&x.data.format==='our-slice-backup'){chapters.push({...x,name});known.add(name)}}
+  localStorage.setItem(p+'our-slice-save-slots-v1',JSON.stringify(chapters.slice(0,12)));
+  status.textContent='Saved chapters restored to Update 7.7. Your active game was not changed. Open the 7.7 test and select Save Game to see the chapters.';
+  document.getElementById('apply-import').disabled=true;
+ }catch(err){status.textContent='Restore did not complete: '+err.message}
+};
 </script></body></html>
