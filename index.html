@@ -523,7 +523,9 @@ function drawRoom(room){
  ctx.restore();
 }
 function drawDecorations(){
- for(const o of buildObjects){if(o.deleted)continue;
+ // Draw room floors first, then furniture so items remain visible inside rooms.
+ for(const room of buildObjects){if(!room.deleted&&room.kind==='room')drawRoom(room)}
+ for(const o of buildObjects){if(o.deleted||o.kind==='room')continue;
  const c=buildCatalog.find(c=>c.id===o.kind);if(!c)continue;
  if(o.kind==='room'){drawRoom(o);continue}
  ctx.save();ctx.translate(o.x,o.y);ctx.rotate((o.rotation||0)*Math.PI/180);
