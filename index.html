@@ -266,7 +266,7 @@ function makeBackup(){
  const data={format:'our-slice-backup',version:1,created:new Date().toISOString(),
   bush:JSON.parse(localStorage.getItem('our-slice-bush-v2')||'{}'),
   cafe:JSON.parse(localStorage.getItem('our-slice-cafe-v1')||'{}'),
-  foreshore:JSON.parse(localStorage.getItem('our-slice-foreshore-v1')||'{}'),build:buildObjects};
+  foreshore:JSON.parse(localStorage.getItem('our-slice-foreshore-v1')||'{}'),build:buildObjects,economy77:econ77};
  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
  const url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download='our-slice-backup-'+new Date().toISOString().slice(0,10)+'.json';
@@ -275,7 +275,7 @@ function makeBackup(){
 const SLOT_KEY='our-slice-save-slots-v1';
 function captureSave(){save();cafeSave();return {format:'our-slice-backup',version:1,created:new Date().toISOString(),bush:JSON.parse(localStorage.getItem('our-slice-bush-v2')||'{}'),cafe:JSON.parse(localStorage.getItem('our-slice-cafe-v1')||'{}'),foreshore:JSON.parse(localStorage.getItem('our-slice-foreshore-v1')||'{}'),build:buildObjects}}
 function getSlots(){try{const a=JSON.parse(localStorage.getItem(SLOT_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
-function restoreSave(data){if(data.format!=='our-slice-backup'||data.version!==1||!data.bush||!data.cafe||!data.foreshore)throw Error('Invalid save');localStorage.setItem('our-slice-bush-v2',JSON.stringify(data.bush));localStorage.setItem('our-slice-cafe-v1',JSON.stringify(data.cafe));localStorage.setItem('our-slice-foreshore-v1',JSON.stringify(data.foreshore));localStorage.setItem(BUILD_KEY,JSON.stringify(Array.isArray(data.build)?data.build:[]));location.reload()}
+function restoreSave(data){if(data.format!=='our-slice-backup'||data.version!==1||!data.bush||!data.cafe||!data.foreshore)throw Error('Invalid save');localStorage.setItem('our-slice-bush-v2',JSON.stringify(data.bush));localStorage.setItem('our-slice-cafe-v1',JSON.stringify(data.cafe));localStorage.setItem('our-slice-foreshore-v1',JSON.stringify(data.foreshore));localStorage.setItem(BUILD_KEY,JSON.stringify(Array.isArray(data.build)?data.build:[]));if(data.economy77)localStorage.setItem(ECON77_KEY,JSON.stringify(data.economy77));location.reload()}
 function backupPanel(){
  const slots=getSlots();
  const cards=slots.length?slots.map((a,i)=>`<div class="story-save"><div class="story-copy"><strong>${escapeHtml(a.name||'Our Adventure')}</strong><small>Last saved ${escapeHtml(a.date||'')}</small><div class="story-actions"><button class="story-primary" data-update="${i}">Save our progress</button><button class="story-secondary" data-load="${i}">Continue chapter</button><button class="story-delete" data-delete="${i}">Delete</button></div></div></div>`).join(''):'<div class="story-empty">No saved chapters yet. Start a new chapter below.</div>';
@@ -317,8 +317,8 @@ applyUiSettings();
 document.getElementById('menu').onclick=gameMenu;
 
 const ECON77_KEY='our-slice-economy-77';
-let econ77={money:0,vanTimber:0,toolbelt:{axe:150,hammer:200}};
-try{const e=JSON.parse(localStorage.getItem(ECON77_KEY)||'{}');econ77={...econ77,...e,toolbelt:{...econ77.toolbelt,...(e.toolbelt||{})}}}catch{}
+let econ77={money:0,vanTimber:0,toolbelt:{axe:150,hammer:200},panels:{floor:0,wall:0,door:0,window:0}};
+try{const e=JSON.parse(localStorage.getItem(ECON77_KEY)||'{}');econ77={...econ77,...e,toolbelt:{...econ77.toolbelt,...(e.toolbelt||{})},panels:{...econ77.panels,...(e.panels||{})}}}catch{}
 function saveEcon77(){try{localStorage.setItem(ECON77_KEY,JSON.stringify(econ77))}catch{}}
 function pocketSlots77(){return Object.values(inventory).reduce((n,v)=>n+Math.ceil(Math.max(0,Number(v)||0)/100),0)}
 function pocketSpace77(item){const n=inventory[item]||0;return Math.max(0,(10-pocketSlots77())*100+(n%100?100-n%100:0))}
@@ -326,13 +326,18 @@ function hiAce77(){
  open('HiAce storage','<p>Timber in pockets: '+(inventory.Timber||0)+'</p><p>Timber in van: '+econ77.vanTimber+'</p><button id="unload77">Unload timber</button>');
  document.getElementById('unload77').onclick=()=>{econ77.vanTimber+=inventory.Timber||0;delete inventory.Timber;saveEcon77();save();hud();hiAce77()};
 }
+const panelPrices77={floor:12,wall:20,door:35,window:30};
 function bunnings77(){
  const total=(inventory.Timber||0)+econ77.vanTimber;
- open('Bruce at Bunnings','<p>Money: '+econ77.money+' dollars. Timber: '+total+'</p><p>Timber sells for 2 dollars each.</p><button id="sell1">Sell 1</button><button id="sell10">Sell 10</button><button id="sellall">Sell all</button>');
+ const rows=Object.keys(panelPrices77).map(t=>'<p>1m '+t+' panel · '+panelPrices77[t]+' dollars · owned '+econ77.panels[t]+' <button data-buy77="'+t+'">Buy</button></p>').join('');
+ open('Bruce at Bunnings','<p>Money: '+econ77.money+' dollars. Timber: '+total+'</p><p>Timber sells for 2 dollars each.</p><button id="sell1">Sell 1</button><button id="sell10">Sell 10</button><button id="sellall">Sell all</button><h4>Building supplies</h4>'+rows+'<h4>Replacement tools</h4><button id="axe77">Axe · 25 dollars</button><button id="hammer77">Hammer · 20 dollars</button>');
  const sell=qty=>{let n=Math.min(qty,(inventory.Timber||0)+econ77.vanTimber);const fromPocket=Math.min(n,inventory.Timber||0);inventory.Timber=(inventory.Timber||0)-fromPocket;econ77.vanTimber-=n-fromPocket;econ77.money+=n*2;save();saveEcon77();hud();bunnings77()};
  document.getElementById('sell1').onclick=()=>sell(1);
  document.getElementById('sell10').onclick=()=>sell(10);
  document.getElementById('sellall').onclick=()=>sell(total);
+ panel.querySelectorAll('[data-buy77]').forEach(b=>b.onclick=()=>{const t=b.dataset.buy77;if(econ77.money<panelPrices77[t]){say('Not enough money.');return}econ77.money-=panelPrices77[t];econ77.panels[t]++;saveEcon77();bunnings77()});
+ for(const [tool,cost,max] of [['axe',25,150],['hammer',20,200]])document.getElementById(tool+'77').onclick=()=>{if(econ77.money<cost){say('Not enough money.');return}econ77.money-=cost;econ77.toolbelt[tool]=max;saveEcon77();bunnings77()};
+
 }
 const BUILD_KEY='our-slice-build-v1';
 const ROOM_MATERIALS={
@@ -360,7 +365,7 @@ const buildCatalog=[
 ];
 let buildObjects=[];
 try{const a=JSON.parse(localStorage.getItem(BUILD_KEY)||'[]');if(Array.isArray(a))buildObjects=a.filter(validBuild).slice(0,40)}catch{}
-function validBuild(o){return o&&typeof o==='object'&&buildCatalog.some(c=>c.id===o.kind)&&typeof o.id==='string'&&o.id.length<80&&Number.isFinite(o.x)&&Number.isFinite(o.y)&&o.x>=20&&o.x<=W-20&&o.y>=20&&o.y<=H-20&&Number.isFinite(o.at)&&(o.kind!=='room'||(Number.isFinite(o.w)&&Number.isFinite(o.h)&&o.w>=40&&o.h>=40&&o.x+o.w<=W-20&&o.y+o.h<=H-20&&(!o.material||Object.hasOwn(ROOM_MATERIALS,o.material))&&(!o.floor||Object.hasOwn(ROOM_FLOORS,o.floor))&&(!('openings' in o)||(Array.isArray(o.openings)&&o.openings.length<=30&&o.openings.every(p=>p&&['door','window'].includes(p.kind)&&['top','bottom','left','right'].includes(p.side)&&Number.isFinite(p.pos)&&p.pos>=0&&p.pos<=((p.side==='top'||p.side==='bottom')?o.w:o.h))))))}
+function validBuild(o){return o&&typeof o==='object'&&(buildCatalog.some(c=>c.id===o.kind)||['panel-floor','panel-wall','panel-door','panel-window'].includes(o.kind))&&typeof o.id==='string'&&o.id.length<80&&Number.isFinite(o.x)&&Number.isFinite(o.y)&&o.x>=20&&o.x<=W-20&&o.y>=20&&o.y<=H-20&&Number.isFinite(o.at)&&(o.kind!=='room'||(Number.isFinite(o.w)&&Number.isFinite(o.h)&&o.w>=40&&o.h>=40&&o.x+o.w<=W-20&&o.y+o.h<=H-20&&(!o.material||Object.hasOwn(ROOM_MATERIALS,o.material))&&(!o.floor||Object.hasOwn(ROOM_FLOORS,o.floor))&&(!('openings' in o)||(Array.isArray(o.openings)&&o.openings.length<=30&&o.openings.every(p=>p&&['door','window'].includes(p.kind)&&['top','bottom','left','right'].includes(p.side)&&Number.isFinite(p.pos)&&p.pos>=0&&p.pos<=((p.side==='top'||p.side==='bottom')?o.w:o.h))))))}
 function saveBuild(){try{localStorage.setItem(BUILD_KEY,JSON.stringify(buildObjects))}catch{say('Unable to save decorations on this device.')}}
 function sendBuildSync(){if(netConn&&netConn.open)netConn.send({type:'build-sync',objects:buildObjects})}
 function handleBuildMessage(d){
@@ -411,6 +416,7 @@ function undoBuild(redo=false){
 function buildMenu(){
  if(scene!=='bush'){say('Travel to Our Slice to build and decorate.');return}
  const categories=[
+ ['1m Panels',[['panel-floor','1m floor'],['panel-wall','1m wall'],['panel-door','1m doorway'],['panel-window','1m window']]],
  ['Structures',[['room','Draw a rectangular room'],['door','Add a door to a room'],['window','Add a window to a room'],['material','Change wall material'],['floor','Change floor finish']]],
  ['Furniture',buildCatalog.filter(c=>['bench','table','chair','sign'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Landscaping',buildCatalog.filter(c=>['firepit','lantern'].includes(c.id)).map(c=>[c.id,c.name])],
@@ -422,6 +428,7 @@ function buildMenu(){
  panel.querySelectorAll('[data-build-action]').forEach(b=>b.onclick=()=>{
  const kind=b.dataset.buildAction;
  if(kind==='undo'||kind==='redo'){undoBuild(kind==='redo');buildMenu();return}
+ if(kind.startsWith('panel-')){buildMode={kind};panel.style.display='none';say('Tap to place a purchased 1m panel.');return}
  if(['remove','remove-opening','move','rotate','door','window','material','floor'].includes(kind)){buildMode={action:kind};panel.style.display='none';say(kind==='remove'?'Tap furniture or inside a room to remove it.':kind==='remove-opening'?'Tap near a door or window to remove it.':kind==='move'?'Tap the furniture you want to move.':kind==='rotate'?'Tap furniture to rotate it 90 degrees.':kind==='material'||kind==='floor'?'Tap a room to change its '+(kind==='material'?'walls.':'floor.'):'Tap near the wall where you want a '+kind+'.');return}
  if(buildObjects.filter(o=>!o.deleted).length>=40){say('Building limit reached.');return}
  buildMode={kind};panel.style.display='none';say(kind==='room'?'Tap the first corner of your room.':'Tap to place your item.');
@@ -460,6 +467,16 @@ function placeDecoration(x,y){
   if(buildMode.action==='move'){buildMode.selected=best.id;say('Now tap where you want to move it.');return true}
   recordBuildChange(best,{...best,rotation:((best.rotation||0)+90)%360,at:Date.now()});
   buildMode=null;saveBuild();sendBuildSync();say('Furniture rotated.');return true;
+ }
+ if(buildMode.kind.startsWith('panel-')){
+  const t=buildMode.kind.slice(6),px=Math.round(x/40)*40,py=Math.round(y/40)*40;
+  if(!econ77.panels[t]){say('Buy this panel at Bunnings first.');buildMode=null;return true}
+  if(px<40||py<40||px>W-80||py>H-80){say('Choose a position inside the property.');return true}
+  if(buildObjects.filter(o=>!o.deleted).length>=40){say('Building limit reached.');return true}
+  if(buildObjects.some(o=>!o.deleted&&o.kind===buildMode.kind&&o.x===px&&o.y===py)){say('That panel is already there.');return true}
+  if(t!=='floor'&&econ77.toolbelt.hammer<=0){say('Your hammer has worn out. Buy a replacement.');return true}
+  const o={id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),kind:buildMode.kind,x:px,y:py,at:Date.now()};
+  buildObjects.push(o);recordBuild(o.id,true);econ77.panels[t]--;if(t!=='floor')econ77.toolbelt.hammer--;saveEcon77();saveBuild();sendBuildSync();buildMode=null;say('Placed a 1m '+t+' panel.');return true;
  }
  if(buildMode.kind==='room'){
   const snap=v=>Math.round(v/20)*20,p={x:snap(x),y:snap(y)};
@@ -618,6 +635,12 @@ function drawDecorations(){
  // Draw room floors first, then furniture so items remain visible inside rooms.
  for(const room of buildObjects){if(!room.deleted&&room.kind==='room')drawRoom(room)}
  for(const o of buildObjects){if(o.deleted||o.kind==='room')continue;
+ if(o.kind.startsWith('panel-')){
+  const t=o.kind.slice(6);ctx.save();ctx.fillStyle=t==='floor'?'#cbb994':t==='wall'?'#715844':t==='door'?'#b78a55':'#8cc5d2';
+  if(t==='floor'){ctx.fillRect(o.x,o.y,40,40);ctx.strokeStyle='#7f6c54';ctx.strokeRect(o.x,o.y,40,40)}
+  else{ctx.fillRect(o.x,o.y-5,40,10);if(t==='door'){ctx.fillStyle='#e6d1aa';ctx.fillRect(o.x+6,o.y-4,28,8)}}
+  ctx.restore();continue;
+ }
  const c=buildCatalog.find(c=>c.id===o.kind);if(!c)continue;
  if(o.kind==='room'){drawRoom(o);continue}
  ctx.save();ctx.translate(o.x,o.y);ctx.rotate((o.rotation||0)*Math.PI/180);
