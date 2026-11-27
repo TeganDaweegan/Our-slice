@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Our Slice · Update 7.5.4</title><style>*{box-sizing:border-box}html,body{overscroll-behavior:none}body{margin:0;background:#192d24;color:#f3efdc;font-family:system-ui,sans-serif}header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}header strong{font-size:23px}header span{font-size:12px;opacity:.8}#stage{position:relative;margin:0 10px;border:5px solid #6c8262;border-radius:18px;overflow:hidden;background:#9fb184}canvas{display:block;width:100%;touch-action:none}#msg{min-height:45px;padding:9px 17px;font-size:14px}#hud{display:flex;gap:8px;justify-content:space-between;padding:0 12px;font-size:13px;flex-wrap:wrap}#controls{display:flex;justify-content:space-between;align-items:center;padding:12px 12px 24px;gap:12px;max-width:700px;margin:auto;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}.dpad{display:grid;grid-template-columns:repeat(3,clamp(42px,13vw,64px));grid-template-rows:repeat(2,clamp(48px,12vw,58px));gap:5px;flex-shrink:0}.dpad button:nth-child(1){grid-column:2}.dpad button:nth-child(2){grid-column:1;grid-row:2}.dpad button:nth-child(3){grid-column:2;grid-row:2}.dpad button:nth-child(4){grid-column:3;grid-row:2}button{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;cursor:pointer;border:1px solid #b9c9b6;background:#426b58;color:white;border-radius:13px;font-size:23px;touch-action:none}button:active,button.pressed{background:#719d7c}.actions{display:flex;flex-direction:column;gap:8px;flex:0 1 160px;min-width:0}.actions button{font-size:clamp(11px,3vw,14px);padding:10px 6px;min-height:44px;line-height:1.15}@media(max-width:370px){#controls{padding-inline:6px;gap:6px}.dpad{gap:3px}}#panel{position:fixed;z-index:3;inset:auto 12px 14px;background:#f4ebd4;color:#26372d;border-radius:14px;padding:15px;box-shadow:0 0 0 200vmax #0008;display:none;max-height:70vh;overflow:auto}#panel h3{margin:0 0 10px}#panel button{font-size:14px;padding:9px;margin:4px}#panel .close{float:right;background:#695b49}#panel p{font-size:14px}
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Our Slice · Update 7.6</title><style>*{box-sizing:border-box}html,body{overscroll-behavior:none}body{margin:0;background:#192d24;color:#f3efdc;font-family:system-ui,sans-serif}header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}header strong{font-size:23px}header span{font-size:12px;opacity:.8}#stage{position:relative;margin:0 10px;border:5px solid #6c8262;border-radius:18px;overflow:hidden;background:#9fb184}canvas{display:block;width:100%;touch-action:none}#msg{min-height:45px;padding:9px 17px;font-size:14px}#hud{display:flex;gap:8px;justify-content:space-between;padding:0 12px;font-size:13px;flex-wrap:wrap}#controls{display:flex;justify-content:space-between;align-items:center;padding:12px 12px 24px;gap:12px;max-width:700px;margin:auto;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}.dpad{display:grid;grid-template-columns:repeat(3,clamp(42px,13vw,64px));grid-template-rows:repeat(2,clamp(48px,12vw,58px));gap:5px;flex-shrink:0}.dpad button:nth-child(1){grid-column:2}.dpad button:nth-child(2){grid-column:1;grid-row:2}.dpad button:nth-child(3){grid-column:2;grid-row:2}.dpad button:nth-child(4){grid-column:3;grid-row:2}button{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;cursor:pointer;border:1px solid #b9c9b6;background:#426b58;color:white;border-radius:13px;font-size:23px;touch-action:none}button:active,button.pressed{background:#719d7c}.actions{display:flex;flex-direction:column;gap:8px;flex:0 1 160px;min-width:0}.actions button{font-size:clamp(11px,3vw,14px);padding:10px 6px;min-height:44px;line-height:1.15}@media(max-width:370px){#controls{padding-inline:6px;gap:6px}.dpad{gap:3px}}#panel{position:fixed;z-index:3;inset:auto 12px 14px;background:#f4ebd4;color:#26372d;border-radius:14px;padding:15px;box-shadow:0 0 0 200vmax #0008;display:none;max-height:70vh;overflow:auto}#panel h3{margin:0 0 10px}#panel button{font-size:14px;padding:9px;margin:4px}#panel .close{float:right;background:#695b49}#panel p{font-size:14px}
 /* Our Slice parchment menus */
 #panel.storybook{background:linear-gradient(145deg,#fff5dc,#e8d6ae);color:#463b2b;border:3px solid #8e704a;border-radius:20px;padding:18px;max-height:82dvh;box-shadow:0 0 0 200vmax #000a,0 12px 40px #0008}
 #panel.storybook h3{font-family:Georgia,serif;font-size:27px;color:#4b3b2c;margin:0 0 5px}
@@ -28,8 +28,8 @@
 #panel.game-menu .menu-section button{font-size:14px;background:#54725c;padding:10px 13px}
 #panel.game-menu label{display:block;margin:12px 0;font-size:14px}
 #panel.game-menu input[type=checkbox]{width:19px;height:19px;vertical-align:middle;margin-right:9px}
-</style><script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" defer></script></head><body><header><strong>Our Slice</strong><span>Cuntown · Update 7.5.4</span></header><div id="stage"><canvas id="view" width="640" height="450"></canvas></div><div id="msg">Tap to walk, or hold and drag your finger to steer. Your first date starts at Goose Café.</div><div id="hud"><span id="inventory">Backpack: empty</span><span id="found">Discoveries: 0 / 6</span></div><div id="controls"><div class="dpad" title="Optional directional controls"><button data-key="up">▲</button><button data-key="left">◀</button><button data-key="down">▼</button><button data-key="right">▶</button></div><div class="actions"><button id="explore">Talk to Maddie</button><button id="storage">Van storage</button><button id="camp">Set up camp</button><button id="build">Build / Decorate</button><button id="journal">Field journal</button><button id="backup">Save</button><button id="menu">Menu</button><button id="travel">Travel</button></div></div><div id="panel"></div><script>
-(()=>{'use strict';const canvas=document.getElementById('view'),ctx=canvas.getContext('2d'),msg=document.getElementById('msg'),panel=document.getElementById('panel');const W=1900,H=1450;let player={x:830,y:750},dog={x:860,y:772},camera={x:0,y:0},keys={up:false,down:false,left:false,right:false},inventory={},stored={},camp='none',discovered=new Set(),last=0,bird=0,swear=0;const spots=[{x:660,y:590,n:'Campervan',desc:'Your silver-grey HiAce with its pop-top and awning.'},{x:1100,y:440,n:'Granite lookout',desc:'A broad granite outcrop, warm in the afternoon sun.'},{x:960,y:1040,n:'Seasonal creek',desc:'A winding seasonal creek running through the property.'},{x:425,y:960,n:'Old walking trail',desc:'A quiet track through the woodland.'},{x:1510,y:770,n:'Secret clearing',desc:'A sheltered clearing with room to build or garden.'},{x:1400,y:1160,n:'Unusual tree',desc:'There is a tiny, curious hollow in the trunk.'}];const finds=[{x:745,y:690,n:'Fallen branch',item:'Timber',qty:2},{x:1190,y:520,n:'Smooth stones',item:'Stone',qty:3},{x:520,y:875,n:'Gumnuts',item:'Gumnuts',qty:4},{x:1520,y:815,n:'Interesting bottle',item:'Vintage bottle',qty:1},{x:1130,y:1130,n:'Driftwood',item:'Driftwood',qty:1},{x:370,y:490,n:'Old tin',item:'Vintage tin',qty:1}];let foreshore={x:350,y:430},fishCaught={},jettyWalked=false,foreshoreFound=new Set(),trainRides=0;let scene='cafe', cafePos={x:365,y:310}, cafeGames=0, cafeBest=0, gameRound=null, gameStep=0, gameAnswers={}, gameScore=0;
+</style><script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" defer></script></head><body><header><strong>Our Slice</strong><span>Cuntown · Update 7.7.1</span></header><div id="stage"><canvas id="view" width="640" height="450"></canvas></div><div id="msg">Tap to walk, or hold and drag your finger to steer. Your first date starts at Goose Café.</div><div id="hud"><span id="inventory">Backpack: empty</span><span id="found">Discoveries: 0 / 6</span></div><div id="controls"><div class="dpad" title="Optional directional controls"><button data-key="up">▲</button><button data-key="left">◀</button><button data-key="down">▼</button><button data-key="right">▶</button></div><div class="actions"><button id="explore">Talk to Maddie</button><button id="storage">Van storage</button><button id="camp">Set up camp</button><button id="build">Build / Decorate</button><button id="journal">Field journal</button><button id="backup">Save</button><button id="menu">Menu</button><button id="travel">Travel</button></div></div><div id="panel"></div><script>
+(()=>{'use strict';const canvas=document.getElementById('view'),ctx=canvas.getContext('2d'),msg=document.getElementById('msg'),panel=document.getElementById('panel');const W=1900,H=1450;let player={x:830,y:750},dog={x:860,y:772},camera={x:0,y:0},keys={up:false,down:false,left:false,right:false},inventory={},stored={},camp='none',discovered=new Set(),last=0,bird=0,swear=0;const spots=[{x:660,y:590,n:'Campervan',desc:'Your silver-grey HiAce with its pop-top and awning.'},{x:1100,y:440,n:'Granite lookout',desc:'A broad granite outcrop, warm in the afternoon sun.'},{x:960,y:1040,n:'Seasonal creek',desc:'A winding seasonal creek running through the property.'},{x:425,y:960,n:'Old walking trail',desc:'A quiet track through the woodland.'},{x:1510,y:770,n:'Secret clearing',desc:'A sheltered clearing with room to build or garden.'},{x:1400,y:1160,n:'Unusual tree',desc:'There is a tiny, curious hollow in the trunk.'}];const finds=[{x:745,y:690,n:'Fallen branch',item:'Timber',qty:2},{x:1190,y:520,n:'Smooth stones',item:'Stone',qty:3},{x:520,y:875,n:'Gumnuts',item:'Gumnuts',qty:4},{x:1520,y:815,n:'Interesting bottle',item:'Vintage bottle',qty:1},{x:1130,y:1130,n:'Driftwood',item:'Driftwood',qty:1},{x:370,y:490,n:'Old tin',item:'Vintage tin',qty:1},{x:720,y:850,n:'Fallen log',item:'Timber',qty:5,visual:'log'},{x:1290,y:1000,n:'Fallen log',item:'Timber',qty:5,visual:'log'}];let foreshore={x:350,y:430},fishCaught={},jettyWalked=false,foreshoreFound=new Set(),trainRides=0;let scene='cafe', cafePos={x:365,y:310}, cafeGames=0, cafeBest=0, gameRound=null, gameStep=0, gameAnswers={}, gameScore=0;
 // Experimental peer-to-peer multiplayer. PeerJS public signalling is an external dependency.
 const NET_PREFIX='ourslice-xmas70-';
 let netPeer=null,netConn=null,netRole=null,netRoom='',netRemote=null,netLastSend=0;let sharedGame=null;let sharedTrip=null;let sharedHistory=[];
@@ -168,6 +168,7 @@ Eileen:'Eileen examines a peculiar ornament. “I saw it first. Unless you want 
 Bruce:'Bruce gestures at the hardware aisles. “You would be surprised what you can make with a few brackets and a bit of imagination.”',
 Renee:'Renee waves you through the yard. “Have a rummage. Just watch your feet, and shout if you need a hand.”'
 };
+if(who==='Bruce'){bunnings77();return}
 open(who,`<p>${speech[who]}</p><button id="shopagain">Keep looking around</button>`);
 document.getElementById('shopagain').onclick=()=>{panel.style.display='none';say('Explore the shop or speak to someone else.')};
 }
@@ -265,17 +266,17 @@ function makeBackup(){
  const data={format:'our-slice-backup',version:1,created:new Date().toISOString(),
   bush:JSON.parse(localStorage.getItem('our-slice-bush-v2')||'{}'),
   cafe:JSON.parse(localStorage.getItem('our-slice-cafe-v1')||'{}'),
-  foreshore:JSON.parse(localStorage.getItem('our-slice-foreshore-v1')||'{}'),build:buildObjects};
+  foreshore:JSON.parse(localStorage.getItem('our-slice-foreshore-v1')||'{}'),build:buildObjects,economy77:econ77};
  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
  const url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download='our-slice-backup-'+new Date().toISOString().slice(0,10)+'.json';
  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
 const SLOT_KEY='our-slice-save-slots-v1';
-function captureSave(){save();cafeSave();return {format:'our-slice-backup',version:1,created:new Date().toISOString(),bush:JSON.parse(localStorage.getItem('our-slice-bush-v2')||'{}'),cafe:JSON.parse(localStorage.getItem('our-slice-cafe-v1')||'{}'),foreshore:JSON.parse(localStorage.getItem('our-slice-foreshore-v1')||'{}'),build:buildObjects}}
+function captureSave(){save();cafeSave();return {format:'our-slice-backup',version:1,created:new Date().toISOString(),bush:JSON.parse(localStorage.getItem('our-slice-bush-v2')||'{}'),cafe:JSON.parse(localStorage.getItem('our-slice-cafe-v1')||'{}'),foreshore:JSON.parse(localStorage.getItem('our-slice-foreshore-v1')||'{}'),build:buildObjects,economy77:econ77}}
 function getSlots(){try{const a=JSON.parse(localStorage.getItem(SLOT_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
 let restoringChapter=false;
-function restoreSave(data){if(data.format!=='our-slice-backup'||data.version!==1||!data.bush||!data.cafe||!data.foreshore)throw Error('Invalid save');restoringChapter=true;try{localStorage.setItem('our-slice-bush-v2',JSON.stringify(data.bush));localStorage.setItem('our-slice-cafe-v1',JSON.stringify(data.cafe));localStorage.setItem('our-slice-foreshore-v1',JSON.stringify(data.foreshore));localStorage.setItem(BUILD_KEY,JSON.stringify(Array.isArray(data.build)?data.build:[]));location.reload()}catch(e){restoringChapter=false;throw e}}
+function restoreSave(data){if(data.format!=='our-slice-backup'||data.version!==1||!data.bush||!data.cafe||!data.foreshore)throw Error('Invalid save');restoringChapter=true;try{localStorage.setItem('our-slice-bush-v2',JSON.stringify(data.bush));localStorage.setItem('our-slice-cafe-v1',JSON.stringify(data.cafe));localStorage.setItem('our-slice-foreshore-v1',JSON.stringify(data.foreshore));localStorage.setItem(BUILD_KEY,JSON.stringify(Array.isArray(data.build)?data.build:[]));if(data.economy77)localStorage.setItem(ECON77_KEY,JSON.stringify(data.economy77));location.reload()}catch(e){restoringChapter=false;throw e}}
 function backupPanel(){
  const slots=getSlots();
  const cards=slots.length?slots.map((a,i)=>`<div class="story-save"><div class="story-copy"><strong>${escapeHtml(a.name||'Our Adventure')}</strong><small>Last saved ${escapeHtml(a.date||'')}</small><div class="story-actions"><button class="story-primary" data-update="${i}">Save our progress</button><button class="story-secondary" data-load="${i}">Continue chapter</button><button class="story-delete" data-delete="${i}">Delete</button></div></div></div>`).join(''):'<div class="story-empty">No saved chapters yet. Start a new chapter below.</div>';
@@ -300,7 +301,7 @@ function gameMenu(){
 function pocketsMenu(){
  const entries=Object.entries(inventory).filter(([k,v])=>v>0);
  const rows=entries.length?entries.map(([k,v])=>`<div class="story-save"><div class="story-copy"><strong>${escapeHtml(k)}</strong><small>Quantity: ${Number(v)||0}</small></div></div>`).join(''):'<div class="story-empty">Nothing in your pockets yet. There is plenty to find.</div>';
- open('Pockets',`<p class="story-lead">All the little things we pick up along the way.</p>${rows}<p><button id="back-to-menu">Back to menu</button></p>`);
+ open('Pockets',`<p class="story-lead">Slots: ${pocketSlots77()}/10 · 100 per stack.</p><p>Tool belt: axe ${econ77.toolbelt.axe}/150 · hammer ${econ77.toolbelt.hammer}/200</p>${rows}<p><button id="back-to-menu">Back to menu</button></p>`);
  panel.classList.add('storybook');document.getElementById('back-to-menu').onclick=gameMenu;
 }
 const UI_SETTINGS_KEY='our-slice-ui-settings-v1';
@@ -316,8 +317,44 @@ function settingsMenu(){
 applyUiSettings();
 document.getElementById('menu').onclick=gameMenu;
 
+const ECON77_KEY='our-slice-economy-77';
+let econ77={money:0,vanTimber:0,toolbelt:{axe:150,hammer:200},panels:{floor:0,wall:0,door:0,window:0}};
+try{const e=JSON.parse(localStorage.getItem(ECON77_KEY)||'{}');econ77={...econ77,...e,toolbelt:{...econ77.toolbelt,...(e.toolbelt||{})},panels:{...econ77.panels,...(e.panels||{})}}}catch{}
+function saveEcon77(){try{localStorage.setItem(ECON77_KEY,JSON.stringify(econ77))}catch{}}
+function pocketSlots77(){return Object.values(inventory).reduce((n,v)=>n+Math.ceil(Math.max(0,Number(v)||0)/100),0)}
+function pocketSpace77(item){const n=inventory[item]||0;return Math.max(0,(10-pocketSlots77())*100+(n%100?100-n%100:0))}
+function hiAce77(){
+ open('HiAce storage','<p>Timber in pockets: '+(inventory.Timber||0)+'</p><p>Timber in van: '+econ77.vanTimber+'</p><button id="unload77">Unload timber</button>');
+ document.getElementById('unload77').onclick=()=>{econ77.vanTimber+=inventory.Timber||0;delete inventory.Timber;saveEcon77();save();hud();hiAce77()};
+}
+const panelPrices77={floor:12,wall:20,door:35,window:30};
+function bunnings77(){
+ const total=(inventory.Timber||0)+econ77.vanTimber;
+ const rows=Object.keys(panelPrices77).map(t=>'<p>1m '+t+' panel · '+panelPrices77[t]+' dollars · owned '+econ77.panels[t]+' <button data-buy77="'+t+'">Buy</button></p>').join('');
+ open('Bruce at Bunnings','<p>Money: '+econ77.money+' dollars. Timber: '+total+'</p><p>Timber sells for 2 dollars each.</p><button id="sell1">Sell 1</button><button id="sell10">Sell 10</button><button id="sellall">Sell all</button><h4>Building supplies</h4>'+rows+'<h4>Replacement tools</h4><button id="axe77">Axe · 25 dollars</button><button id="hammer77">Hammer · 20 dollars</button>');
+ const sell=qty=>{let n=Math.min(qty,(inventory.Timber||0)+econ77.vanTimber);const fromPocket=Math.min(n,inventory.Timber||0);inventory.Timber=(inventory.Timber||0)-fromPocket;econ77.vanTimber-=n-fromPocket;econ77.money+=n*2;save();saveEcon77();hud();bunnings77()};
+ document.getElementById('sell1').onclick=()=>sell(1);
+ document.getElementById('sell10').onclick=()=>sell(10);
+ document.getElementById('sellall').onclick=()=>sell(total);
+ panel.querySelectorAll('[data-buy77]').forEach(b=>b.onclick=()=>{const t=b.dataset.buy77;if(econ77.money<panelPrices77[t]){say('Not enough money.');return}econ77.money-=panelPrices77[t];econ77.panels[t]++;saveEcon77();bunnings77()});
+ for(const [tool,cost,max] of [['axe',25,150],['hammer',20,200]])document.getElementById(tool+'77').onclick=()=>{if(econ77.money<cost){say('Not enough money.');return}econ77.money-=cost;econ77.toolbelt[tool]=max;saveEcon77();bunnings77()};
+
+}
 const BUILD_KEY='our-slice-build-v1';
+const ROOM_MATERIALS={
+ timber:{label:'Timber',floor:'#cbb994',wall:'#715844',trim:'#e6d8b6'},
+ brick:{label:'Brick',floor:'#d3b7a0',wall:'#a45943',trim:'#f0d6c1'},
+ stone:{label:'Stone',floor:'#b6b5a9',wall:'#6c706e',trim:'#e2e2d7'},
+ metal:{label:'Corrugated metal',floor:'#bdc3c0',wall:'#677f85',trim:'#e0e9e8'}
+};
+const ROOM_FLOORS={
+ boards:{label:'Timber boards',color:'#cbb994'},
+ concrete:{label:'Concrete',color:'#b6b8b3'},
+ tiles:{label:'Terracotta tiles',color:'#bd8668'},
+ earth:{label:'Compacted earth',color:'#b69a76'}
+};
 const buildCatalog=[
+ {id:'room',name:'Rectangular room',color:'#bca780',cost:0},
  {id:'bench',name:'Timber bench',color:'#866142',cost:0},
  {id:'garden',name:'Native garden bed',color:'#647d42',cost:0},
  {id:'firepit',name:'Stone fire pit',color:'#776c60',cost:0},
@@ -329,7 +366,7 @@ const buildCatalog=[
 ];
 let buildObjects=[];
 try{const a=JSON.parse(localStorage.getItem(BUILD_KEY)||'[]');if(Array.isArray(a))buildObjects=a.filter(validBuild).slice(0,40)}catch{}
-function validBuild(o){return o&&typeof o==='object'&&buildCatalog.some(c=>c.id===o.kind)&&typeof o.id==='string'&&o.id.length<80&&Number.isFinite(o.x)&&Number.isFinite(o.y)&&o.x>=20&&o.x<=W-20&&o.y>=20&&o.y<=H-20&&Number.isFinite(o.at)}
+function validBuild(o){return o&&typeof o==='object'&&(buildCatalog.some(c=>c.id===o.kind)||['panel-floor','panel-wall','panel-door','panel-window'].includes(o.kind))&&typeof o.id==='string'&&o.id.length<80&&Number.isFinite(o.x)&&Number.isFinite(o.y)&&o.x>=20&&o.x<=W-20&&o.y>=20&&o.y<=H-20&&Number.isFinite(o.at)&&(o.kind!=='room'||(Number.isFinite(o.w)&&Number.isFinite(o.h)&&o.w>=40&&o.h>=40&&o.x+o.w<=W-20&&o.y+o.h<=H-20&&(!o.material||Object.hasOwn(ROOM_MATERIALS,o.material))&&(!o.floor||Object.hasOwn(ROOM_FLOORS,o.floor))&&(!('openings' in o)||(Array.isArray(o.openings)&&o.openings.length<=30&&o.openings.every(p=>p&&['door','window'].includes(p.kind)&&['top','bottom','left','right'].includes(p.side)&&Number.isFinite(p.pos)&&p.pos>=0&&p.pos<=((p.side==='top'||p.side==='bottom')?o.w:o.h))))))}
 function saveBuild(){try{localStorage.setItem(BUILD_KEY,JSON.stringify(buildObjects))}catch{say('Unable to save decorations on this device.')}}
 function sendBuildSync(){if(netConn&&netConn.open)netConn.send({type:'build-sync',objects:buildObjects})}
 function handleBuildMessage(d){
@@ -345,32 +382,269 @@ function handleBuildMessage(d){
  if(changed){saveBuild();say('Decorations synced from the other player.')}
  return true;
 }
+const BUILD_HISTORY_KEY='our-slice-build-history-v1';
+const buildHistory=[],buildRedo=[];
+try{
+ const h=JSON.parse(localStorage.getItem(BUILD_HISTORY_KEY)||'{}');
+ const validChange=c=>c&&validBuild(c.before)&&validBuild(c.after)&&c.before.id===c.after.id;
+ if(Array.isArray(h.undo))buildHistory.push(...h.undo.filter(validChange).slice(-40));
+ if(Array.isArray(h.redo))buildRedo.push(...h.redo.filter(validChange).slice(-40));
+}catch{}
+function saveBuildHistory(){
+ try{localStorage.setItem(BUILD_HISTORY_KEY,JSON.stringify({undo:buildHistory,redo:buildRedo}))}catch{}
+}
+function recordBuildChange(before,after){
+ const i=buildObjects.findIndex(o=>o.id===before.id);
+ if(i<0)return;
+ buildObjects[i]=after;
+ buildHistory.push({before:{...before},after:{...after}});
+ if(buildHistory.length>40)buildHistory.shift();
+ buildRedo.length=0;saveBuildHistory();
+}
+function recordBuild(id,added){
+ const o=buildObjects.find(o=>o.id===id);if(!o)return;
+ const before={...o,deleted:added?true:false},after={...o,deleted:!added};
+ buildHistory.push({before,after});if(buildHistory.length>40)buildHistory.shift();buildRedo.length=0;saveBuildHistory();
+}
+function undoBuild(redo=false){
+ const from=redo?buildRedo:buildHistory,to=redo?buildHistory:buildRedo,change=from.pop();
+ if(!change){say('Nothing to '+(redo?'redo':'undo')+'.');return}
+ const i=buildObjects.findIndex(o=>o.id===change.after.id);
+ if(i<0)return;
+ buildObjects[i]={...(redo?change.after:change.before),at:Date.now()};
+ to.push(change);saveBuild();saveBuildHistory();sendBuildSync();say((redo?'Redone. ':'Undone. ')+(redo?buildRedo.length:buildHistory.length)+' more available.');
+}
 function buildMenu(){
  if(scene!=='bush'){say('Travel to Our Slice to build and decorate.');return}
- const rows=buildCatalog.map(c=>`<button data-place="${c.id}">${c.name}</button>`).join('');
- open('Build / Decorate',`<p>Starter furniture is free while we develop material collection. Choose an item, then tap a location on your patch to place it. Maximum 40 items.</p>${rows}<p><button id="build-move">Move or remove furniture</button></p><small>Decorations sync when both players are connected; saved locally on each device.</small>`);
- panel.querySelectorAll('[data-place]').forEach(b=>b.onclick=()=>{if(buildObjects.length>=40){say('Decoration limit reached.');return}buildMode={kind:b.dataset.place};panel.style.display='none';say('Tap the patch to place '+buildCatalog.find(c=>c.id===buildMode.kind).name+'.')});
- document.getElementById('build-move').onclick=()=>{buildMode={remove:true};panel.style.display='none';say('Tap a decoration to remove it. Tap Build / Decorate to cancel.')};
+ const categories=[
+ ['1m Panels',[['panel-floor','1m floor'],['panel-wall','1m wall'],['panel-door','1m doorway'],['panel-window','1m window']]],
+ ['Structures',[['room','Draw a rectangular room'],['door','Add a door to a room'],['window','Add a window to a room'],['material','Change wall material'],['floor','Change floor finish']]],
+ ['Furniture',buildCatalog.filter(c=>['bench','table','chair','sign'].includes(c.id)).map(c=>[c.id,c.name])],
+ ['Landscaping',buildCatalog.filter(c=>['firepit','lantern'].includes(c.id)).map(c=>[c.id,c.name])],
+ ['Gardening',buildCatalog.filter(c=>['garden','planter'].includes(c.id)).map(c=>[c.id,c.name])],
+ ['Utilities',[['move','Move furniture'],['rotate','Rotate furniture 90°'],['undo','Undo ('+buildHistory.length+' available)'],['redo','Redo ('+buildRedo.length+' available)'],['remove','Remove item or room'],['remove-opening','Remove door or window']]]
+ ];
+ const rows=categories.map(([name,items],i)=>'<details '+(i===0?'open':'')+'><summary style="padding:12px;font-weight:bold">'+name+'</summary>'+items.map(([id,label])=>'<button data-build-action="'+id+'">'+label+'</button>').join('')+'</details>').join('');
+ open('Build / Decorate','<p>Choose a category. For rooms, tap one corner then the opposite corner. Rooms snap to a finer 20-pixel grid. The first corner stays marked while you choose the second. Furniture placement remains free.</p>'+rows+'<small>Up to 40 objects; changes save locally and sync with your partner when connected.</small>');
+ panel.querySelectorAll('[data-build-action]').forEach(b=>b.onclick=()=>{
+ const kind=b.dataset.buildAction;
+ if(kind==='undo'||kind==='redo'){undoBuild(kind==='redo');buildMenu();return}
+ if(kind.startsWith('panel-')){buildMode={kind};panel.style.display='none';say('Tap to place a purchased 1m panel.');return}
+ if(['remove','remove-opening','move','rotate','door','window','material','floor'].includes(kind)){buildMode={action:kind};panel.style.display='none';say(kind==='remove'?'Tap furniture or inside a room to remove it.':kind==='remove-opening'?'Tap near a door or window to remove it.':kind==='move'?'Tap the furniture you want to move.':kind==='rotate'?'Tap furniture to rotate it 90 degrees.':kind==='material'||kind==='floor'?'Tap a room to change its '+(kind==='material'?'walls.':'floor.'):'Tap near the wall where you want a '+kind+'.');return}
+ if(buildObjects.filter(o=>!o.deleted).length>=40){say('Building limit reached.');return}
+ buildMode={kind};panel.style.display='none';say(kind==='room'?'Tap the first corner of your room.':'Tap to place your item.');
+ });
 }
 let buildMode=null;
 function placeDecoration(x,y){
  if(!buildMode)return false;
- if(buildMode.remove){
-  let best=-1,distBest=60;
-  buildObjects.forEach((o,i)=>{const d=Math.hypot(o.x-x,o.y-y);if(d<distBest){best=i;distBest=d}});
-  if(best<0){say('Tap closer to a decoration.');return true}
-  const o=buildObjects[best];buildObjects[best]={...o,at:Date.now(),deleted:true};
-  say('Decoration removed.');buildMode=null;saveBuild();sendBuildSync();return true;
+ if(buildMode.action){
+  if(buildMode.action==='door'||buildMode.action==='window')return placeOpening(x,y,buildMode.action);
+  if(buildMode.action==='remove-opening')return removeOpening(x,y);
+  if(buildMode.action==='material'||buildMode.action==='floor')return selectRoomFinish(x,y,buildMode.action);
+  if(buildMode.action==='move'&&buildMode.selected){
+   const o=buildObjects.find(o=>o.id===buildMode.selected);
+   if(!o||o.deleted){buildMode=null;say('That item is no longer available.');return true}
+   if(x<40||x>W-40||y<40||y>H-40||Math.hypot(x-660,y-590)<100){say('Choose a location within the property, away from the van.');return true}
+   recordBuildChange(o,{...o,x:Math.round(x),y:Math.round(y),at:Date.now()});
+   buildMode=null;saveBuild();sendBuildSync();say('Furniture moved.');return true;
+  }
+  // Prefer a nearby furniture item over the room underneath it.
+  let best=null,distBest=42;
+  for(const o of [...buildObjects].reverse()){
+   if(o.deleted||o.kind==='room')continue;
+   const d=Math.hypot(o.x-x,o.y-y);
+   if(d<distBest){best=o;distBest=d}
+  }
+  if(!best&&buildMode.action==='remove'){
+   best=[...buildObjects].reverse().find(o=>!o.deleted&&o.kind==='room'&&x>=o.x&&x<=o.x+o.w&&y>=o.y&&y<=o.y+o.h)||null;
+  }
+  if(!best){say('Tap closer to an item.');return true}
+  if(buildMode.action==='remove'){
+   recordBuildChange(best,{...best,at:Date.now(),deleted:true});
+   buildMode=null;saveBuild();sendBuildSync();say('Item removed.');return true;
+  }
+  if(best.kind==='room'){say('Choose furniture, not a room.');return true}
+  if(buildMode.action==='move'){buildMode.selected=best.id;say('Now tap where you want to move it.');return true}
+  recordBuildChange(best,{...best,rotation:((best.rotation||0)+90)%360,at:Date.now()});
+  buildMode=null;saveBuild();sendBuildSync();say('Furniture rotated.');return true;
+ }
+ if(buildMode.kind.startsWith('panel-')){
+  const t=buildMode.kind.slice(6),px=Math.round(x/40)*40,py=Math.round(y/40)*40;
+  if(!econ77.panels[t]){say('Buy this panel at Bunnings first.');buildMode=null;return true}
+  if(px<40||py<40||px>W-80||py>H-80){say('Choose a position inside the property.');return true}
+  if(buildObjects.filter(o=>!o.deleted).length>=40){say('Building limit reached.');return true}
+  if(buildObjects.some(o=>!o.deleted&&o.kind===buildMode.kind&&o.x===px&&o.y===py)){say('That panel is already there.');return true}
+  if(t!=='floor'&&econ77.toolbelt.hammer<=0){say('Your hammer has worn out. Buy a replacement.');return true}
+  const o={id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),kind:buildMode.kind,x:px,y:py,at:Date.now()};
+  buildObjects.push(o);recordBuild(o.id,true);econ77.panels[t]--;if(t!=='floor')econ77.toolbelt.hammer--;saveEcon77();saveBuild();sendBuildSync();buildMode=null;say('Placed a 1m '+t+' panel.');return true;
+ }
+ if(buildMode.kind==='room'){
+  const snap=v=>Math.round(v/20)*20,p={x:snap(x),y:snap(y)};
+  if(!buildMode.corner){buildMode.corner=p;say('First corner marked. Tap the opposite corner.');return true}
+  const a=buildMode.corner,left=Math.min(a.x,p.x),top=Math.min(a.y,p.y),w=Math.abs(a.x-p.x),h=Math.abs(a.y-p.y);
+  if(w<40||h<40||left<40||top<40||left+w>W-40||top+h>H-40||Math.hypot(left+w/2-660,top+h/2-590)<110){say('Choose a room at least one grid square wide, inside the property and away from the van.');return true}
+  const id=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
+  buildObjects.push({id,kind:'room',x:left,y:top,w,h,at:Date.now()});recordBuild(id,true);
+  buildMode=null;saveBuild();sendBuildSync();say('Room placed. Open Build / Decorate to add more.');return true;
  }
  if(x<90||x>W-90||y<90||y>H-90||Math.hypot(x-660,y-590)<100){say('Choose an open space away from the van and map edge.');return true}
  const kind=buildMode.kind;
  buildObjects.push({id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),kind,x:Math.round(x),y:Math.round(y),at:Date.now()});
- buildMode=null;saveBuild();sendBuildSync();say('Placed '+buildCatalog.find(c=>c.id===kind).name+'.');return true;
+ recordBuild(buildObjects[buildObjects.length-1].id,true);buildMode=null;saveBuild();sendBuildSync();say('Placed '+buildCatalog.find(c=>c.id===kind).name+'.');return true;
+}
+// Doors and windows belong to rooms so they survive save/load and multiplayer sync.
+function placeOpening(x,y,kind){
+ const width=kind==='door'?32:24;
+ let choice=null,dist=24;
+ for(const room of buildObjects){
+  if(room.deleted||room.kind!=='room')continue;
+  const walls=[
+   {side:'top',d:Math.abs(y-room.y),pos:x-room.x,length:room.w},
+   {side:'bottom',d:Math.abs(y-(room.y+room.h)),pos:x-room.x,length:room.w},
+   {side:'left',d:Math.abs(x-room.x),pos:y-room.y,length:room.h},
+   {side:'right',d:Math.abs(x-(room.x+room.w)),pos:y-room.y,length:room.h}
+  ];
+  for(const w of walls){
+   if(w.pos<0||w.pos>w.length||w.d>=dist)continue;
+   const pos=Math.max(18+width/2,Math.min(w.length-18-width/2,w.pos));
+   if(w.length<width+36)continue;
+   choice={room,side:w.side,pos:Math.round(pos)};dist=w.d;
+  }
+ }
+ if(!choice){say('Tap near the edge of a room with enough wall space.');return true}
+ const {room,side,pos}=choice;
+ const openings=Array.isArray(room.openings)?room.openings:[];
+ if(openings.some(o=>o.side===side&&Math.abs(o.pos-pos)<(o.kind==='door'?32:24)/2+width/2+8)){
+  say('Leave more space between doors and windows.');return true;
+ }
+ const next={...room,openings:[...openings,{side,pos,kind}],at:Date.now()};
+ recordBuildChange(room,next);buildMode=null;saveBuild();sendBuildSync();say(kind==='door'?'Door added.':'Window added.');return true;
+}
+function removeOpening(x,y){
+ let best=null,dist=24;
+ for(const room of buildObjects){
+  if(room.deleted||room.kind!=='room'||!Array.isArray(room.openings))continue;
+  for(let i=0;i<room.openings.length;i++){
+   const o=room.openings[i],px=room.x+(o.side==='left'?0:o.side==='right'?room.w:o.pos);
+   const py=room.y+(o.side==='top'?0:o.side==='bottom'?room.h:o.pos);
+   const d=Math.hypot(px-x,py-y);
+   if(d<dist){dist=d;best={room,index:i}}
+  }
+ }
+ if(!best){say('Tap closer to the door or window you want to remove.');return true}
+ const {room,index}=best;
+ recordBuildChange(room,{...room,openings:room.openings.filter((_,i)=>i!==index),at:Date.now()});
+ buildMode=null;saveBuild();sendBuildSync();say('Opening removed.');return true;
+}
+function selectRoomFinish(x,y,property){
+ const room=[...buildObjects].reverse().find(o=>!o.deleted&&o.kind==='room'&&x>=o.x&&x<=o.x+o.w&&y>=o.y&&y<=o.y+o.h);
+ if(!room){say('Tap inside a room to choose its finish.');return true}
+ buildMode=null;
+ const options=property==='material'?ROOM_MATERIALS:ROOM_FLOORS;
+ const buttons=Object.entries(options).map(([key,value])=>'<button data-room-finish="'+key+'">'+value.label+'</button>').join('');
+ open(property==='material'?'Wall materials':'Floor finishes','<p>Choose a finish for this room.</p>'+buttons);
+ panel.querySelectorAll('[data-room-finish]').forEach(b=>b.onclick=()=>{
+  const current=buildObjects.find(o=>o.id===room.id);
+  if(!current||current.deleted){say('Room no longer exists.');panel.style.display='none';return}
+  const next={...current,[property]:b.dataset.roomFinish,at:Date.now()};
+  recordBuildChange(current,next);saveBuild();sendBuildSync();panel.style.display='none';say('Room finish updated.');
+ });
+ return true;
+}
+function roomWallBlocks(x1,y1,x2,y2){
+ // Check crossings against solid wall segments. Door openings are passable; windows are not.
+ for(const room of buildObjects){
+  if(room.deleted||room.kind!=='room')continue;
+  const openings=Array.isArray(room.openings)?room.openings:[];
+  const crossed=(side,pos,coordinate)=>{
+   const gap=openings.some(o=>o.kind==='door'&&o.side===side&&Math.abs(o.pos-pos)<=13);
+   return !gap;
+  };
+  for(const [side,axis,edge,start,end] of [
+   ['top','y',room.y,room.x,room.x+room.w],
+   ['bottom','y',room.y+room.h,room.x,room.x+room.w],
+   ['left','x',room.x,room.y,room.y+room.h],
+   ['right','x',room.x+room.w,room.y,room.y+room.h]
+  ]){
+   const a=axis==='x'?x1:y1,b=axis==='x'?x2:y2;
+   if(a===b||!(edge>=Math.min(a,b)&&edge<=Math.max(a,b)))continue;
+   const t=(edge-a)/(b-a);
+   if(t<0||t>1)continue;
+   const position=axis==='x'?y1+(y2-y1)*t:x1+(x2-x1)*t;
+   if(position<start||position>end)continue;
+   if(crossed(side,position-start,edge))return true;
+  }
+ }
+ return false;
+}
+function moveThroughRooms(x,y){
+ // Axis-by-axis movement allows sliding along walls instead of sticking at corners.
+ const nx=Math.max(20,Math.min(W-20,x)),ny=Math.max(20,Math.min(H-20,y));
+ if(!roomWallBlocks(player.x,player.y,nx,player.y))player.x=nx;
+ if(!roomWallBlocks(player.x,player.y,player.x,ny))player.y=ny;
+}
+function drawRoom(room){
+ ctx.save();
+ const material=ROOM_MATERIALS[room.material]||ROOM_MATERIALS.timber;
+ const floor=ROOM_FLOORS[room.floor]||ROOM_FLOORS.boards;
+ ctx.fillStyle=room.floor?floor.color:material.floor;ctx.fillRect(room.x,room.y,room.w,room.h);
+ ctx.strokeStyle=material.trim;ctx.lineWidth=2;ctx.strokeRect(room.x+12,room.y+12,room.w-24,room.h-24);
+ const openings=Array.isArray(room.openings)?room.openings:[];
+ for(const [side,length] of [['top',room.w],['bottom',room.w],['left',room.h],['right',room.h]]){
+  const slots=openings.filter(o=>o.side===side&&['door','window'].includes(o.kind)&&Number.isFinite(o.pos)).sort((a,b)=>a.pos-b.pos);
+  let cursor=0;
+  const wall=(from,to)=>{
+   if(to<=from)return;
+   ctx.fillStyle=material.wall;
+   if(side==='top')ctx.fillRect(room.x+from,room.y-5,to-from,10);
+   if(side==='bottom')ctx.fillRect(room.x+from,room.y+room.h-5,to-from,10);
+   if(side==='left')ctx.fillRect(room.x-5,room.y+from,10,to-from);
+   if(side==='right')ctx.fillRect(room.x+room.w-5,room.y+from,10,to-from);
+  };
+  for(const slot of slots){
+   const half=slot.kind==='door'?16:12,start=Math.max(cursor,slot.pos-half),end=Math.min(length,slot.pos+half);
+   wall(cursor,start);
+   ctx.fillStyle=slot.kind==='door'?'#b78a55':'#8cc5d2';
+   if(side==='top'||side==='bottom'){
+    const yy=room.y+(side==='bottom'?room.h:0);
+    ctx.fillRect(room.x+start,yy-4,end-start,8);
+    if(slot.kind==='door'){ctx.strokeStyle='#f5d5a0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(room.x+start,yy,24,0,Math.PI/2);ctx.stroke()}
+   }else{
+    const xx=room.x+(side==='right'?room.w:0);
+    ctx.fillRect(xx-4,room.y+start,8,end-start);
+   }
+   cursor=end;
+  }
+  wall(cursor,length);
+ }
+ ctx.restore();
+}
+function drawBuildGuides(){
+ if(!buildMode||buildMode.kind!=='room'||!buildMode.corner)return;
+ const a=buildMode.corner;
+ ctx.save();ctx.strokeStyle='#fff5b8';ctx.lineWidth=3;
+ ctx.beginPath();ctx.arc(a.x,a.y,10,0,Math.PI*2);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(a.x-16,a.y);ctx.lineTo(a.x+16,a.y);ctx.moveTo(a.x,a.y-16);ctx.lineTo(a.x,a.y+16);ctx.stroke();
+ if(buildMode.hover){
+  const b=buildMode.hover;
+  ctx.setLineDash([8,6]);ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(a.x-b.x),Math.abs(a.y-b.y));
+ }
+ ctx.restore();
 }
 function drawDecorations(){
- for(const o of buildObjects){if(o.deleted)continue;
+ // Draw room floors first, then furniture so items remain visible inside rooms.
+ for(const room of buildObjects){if(!room.deleted&&room.kind==='room')drawRoom(room)}
+ for(const o of buildObjects){if(o.deleted||o.kind==='room')continue;
+ if(o.kind.startsWith('panel-')){
+  const t=o.kind.slice(6);ctx.save();ctx.fillStyle=t==='floor'?'#cbb994':t==='wall'?'#715844':t==='door'?'#b78a55':'#8cc5d2';
+  if(t==='floor'){ctx.fillRect(o.x,o.y,40,40);ctx.strokeStyle='#7f6c54';ctx.strokeRect(o.x,o.y,40,40)}
+  else{ctx.fillRect(o.x,o.y-5,40,10);if(t==='door'){ctx.fillStyle='#e6d1aa';ctx.fillRect(o.x+6,o.y-4,28,8)}}
+  ctx.restore();continue;
+ }
  const c=buildCatalog.find(c=>c.id===o.kind);if(!c)continue;
- ctx.save();ctx.translate(o.x,o.y);
+ if(o.kind==='room'){drawRoom(o);continue}
+ ctx.save();ctx.translate(o.x,o.y);ctx.rotate((o.rotation||0)*Math.PI/180);
  ctx.fillStyle='#25382b66';ctx.beginPath();ctx.ellipse(0,8,25,9,0,0,Math.PI*2);ctx.fill();
  ctx.fillStyle=c.color;
  if(o.kind==='garden'){for(let j=-2;j<=2;j++){ctx.beginPath();ctx.arc(j*8,0,8,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#e8c88a';ctx.fillRect(-2,-6,4,5)}
@@ -384,7 +658,7 @@ function drawDecorations(){
  }
 }
 document.getElementById('build').onclick=()=>{buildMode=null;buildMenu()};
-function say(s){msg.textContent=s}function hud(){if(shops[scene]){document.getElementById('inventory').textContent=shops[scene].title;document.getElementById('found').textContent='Explore · Talk · Exit';return}if(scene==='foreshore'){document.getElementById('inventory').textContent='Cuntown · Jetty 1,841 m';document.getElementById('found').textContent=`Fish: ${Object.values(fishCaught).reduce((a,b)=>a+b,0)} · Train rides: ${trainRides}`;return}if(scene==='cafe'){document.getElementById('inventory').textContent='Goose Café · First date';document.getElementById('found').textContent=`Maddie games: ${cafeGames}`;return}document.getElementById('inventory').textContent='Backpack: '+(Object.entries(inventory).filter(([k,v])=>v>0).map(([k,v])=>`${k} ×${v}`).join(', ')||'empty');document.getElementById('found').textContent=`Discoveries: ${discovered.size} / 6`}function open(title,body){cancelTouchMovement();panel.classList.remove('storybook');panel.style.display='block';panel.innerHTML=`<button class="close" id="close">Close</button><h3>${title}</h3>${body}`;document.getElementById('close').onclick=()=>panel.style.display='none'}function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}function explore(){if(shops[scene]){shopInteract();return}if(scene==='bush'&&player.x<125){showRoadExit();return}if(scene==='cafe'){if(cafePos.x<250&&cafePos.y>370){setScene('foreshore');return}if(Math.hypot(cafePos.x-160,cafePos.y-296)<110){talkMaddie();return}say('Walk over to Maddie near the counter, or head to the exit at the bottom left.');return}if(scene==='foreshore'){foreshoreInteract();return}let choices=[...spots.map((o,i)=>({...o,kind:'spot',i})),...finds.map((o,i)=>({...o,kind:'find',i})).filter(o=>!taken.has(o.i))];choices.sort((a,b)=>dist(a,player)-dist(b,player));const o=choices[0];if(!o||dist(o,player)>95){say('Walk closer to a landmark or something on the ground.');return}if(o.kind==='spot'){discovered.add(o.i);say(o.desc)}else{taken.add(o.i);inventory[o.item]=(inventory[o.item]||0)+o.qty;say(`Collected ${o.item} ×${o.qty}.`)}hud();save()}function journal(){if(scene==='foreshore'){open('Cuntown journal',`<p>Places discovered: ${[...foreshoreFound].map(escapeHtml).join(', ')||'none yet'}</p><p>Train rides: ${trainRides}</p><p>Fish caught: ${Object.entries(fishCaught).map(([k,v])=>escapeHtml(k)+' ×'+v).join(', ')||'none yet'}</p><p>Aggie’s journal: the beach smells wonderful; seabirds remain suspicious.</p>`);return}if(scene==='cafe'){open('Our Slice · Journal',`<p>First date: Goose Café, Busselton.</p><p>Games with Maddie: ${cafeGames}</p><p>Best guessing score: ${cafeBest}/3</p><p>Aggie’s sniff-and-discover journal will grow as new areas are added.</p>`);return}let rows=spots.map((o,i)=>`<p>${discovered.has(i)?"✓":"○"} ${discovered.has(i)?o.n:"Undiscovered location"}</p>`).join("");open("Bush block journal",`<p>Explore landmarks to complete your discoveries.</p>${rows}<p>${discovered.size} of ${spots.length} discovered.</p>`)}function nearVan(){return dist(player,spots[0])<135}function storage(){if(scene!=='bush'){say('Your van storage is at the bush block. Use Travel to visit.');return}if(!nearVan()){say('Walk over to the campervan to access storage.');return}let content='<p>Shared campervan storage (local test only). Tap an item to move it.</p><b>Backpack</b><div>';for(const [k,v] of Object.entries(inventory))if(v)content+=`<button data-move="in" data-item="${k}">${k} ×${v} → van</button>`;content+='</div><b>Van</b><div>';for(const [k,v] of Object.entries(stored))if(v)content+=`<button data-move="out" data-item="${k}">← ${k} ×${v}</button>`;content+='</div>';open('Campervan storage',content);panel.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>{let k=b.dataset.item,src=b.dataset.move==='in'?inventory:stored,dst=b.dataset.move==='in'?stored:inventory;if(src[k]>0){src[k]--;dst[k]=(dst[k]||0)+1;save();hud();storage()}})}function setupCamp(){if(scene!=='bush'){say('Camping is available at the bush block. Use Travel to visit.');return}if(!nearVan()){say('Walk near your van to set up camp.');return}open('Choose a campsite preset','<p>One tap places the setup beside your van.</p><button data-camp="van">Campervan + awning</button><button data-camp="swag">Swag</button><button data-camp="tent">Tent</button><button data-camp="none">Pack up</button>');panel.querySelectorAll('[data-camp]').forEach(b=>b.onclick=()=>{camp=b.dataset.camp;panel.style.display='none';say(camp==='none'?'Campsite packed away.':`Set up ${camp} campsite.`);save()})}document.getElementById('journal').onclick=journal;document.getElementById('explore').onclick=explore;document.getElementById('storage').onclick=storage;document.getElementById('camp').onclick=setupCamp;for(const b of document.querySelectorAll('[data-key]')){const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys[k]=true;b.classList.add('pressed')});const release=e=>{e.preventDefault();keys[k]=false;b.classList.remove('pressed')};b.addEventListener('pointerup',release);b.addEventListener('pointercancel',release);b.addEventListener('lostpointercapture',()=>{keys[k]=false;b.classList.remove('pressed')})}document.getElementById('controls').addEventListener('contextmenu',e=>e.preventDefault());document.getElementById('controls').addEventListener('selectstart',e=>e.preventDefault());window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false;document.querySelectorAll('.pressed').forEach(b=>b.classList.remove('pressed'))});document.addEventListener('keydown',e=>{const k={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',a:'left',s:'down',d:'right'}[e.key];if(k){keys[k]=true;e.preventDefault()}if(e.key==='e')explore()});document.addEventListener('keyup',e=>{const k={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',a:'left',s:'down',d:'right'}[e.key];if(k)keys[k]=false});function ellipse(x,y,rx,ry,c){ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill()}function line(points,color,width){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()}function tree(x,y,s=1){ctx.fillStyle='#675943';ctx.fillRect(x-5*s,y-2*s,10*s,24*s);ellipse(x,y,24*s,23*s,'#3e6446');ellipse(x-8*s,y-9*s,16*s,15*s,'#577e52');ellipse(x+9*s,y-4*s,12*s,14*s,'#6f915b')}function van(){
+function say(s){msg.textContent=s}function hud(){if(shops[scene]){document.getElementById('inventory').textContent=shops[scene].title;document.getElementById('found').textContent='Explore · Talk · Exit';return}if(scene==='foreshore'){document.getElementById('inventory').textContent='Cuntown · Jetty 1,841 m';document.getElementById('found').textContent=`Fish: ${Object.values(fishCaught).reduce((a,b)=>a+b,0)} · Train rides: ${trainRides}`;return}if(scene==='cafe'){document.getElementById('inventory').textContent='Goose Café · First date';document.getElementById('found').textContent=`Maddie games: ${cafeGames}`;return}document.getElementById('inventory').textContent='Backpack: '+(Object.entries(inventory).filter(([k,v])=>v>0).map(([k,v])=>`${k} ×${v}`).join(', ')||'empty');document.getElementById('found').textContent=`Discoveries: ${discovered.size} / 6`}function open(title,body){cancelTouchMovement();panel.classList.remove('storybook');panel.style.display='block';panel.innerHTML=`<button class="close" id="close">Close</button><h3>${title}</h3>${body}`;document.getElementById('close').onclick=()=>panel.style.display='none'}function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}function explore(){if(shops[scene]){shopInteract();return}if(scene==='bush'&&Math.hypot(player.x-660,player.y-590)<105&&!finds.some((f,i)=>!taken.has(i)&&dist(f,player)<80)){hiAce77();return}if(scene==='bush'&&player.x<125){showRoadExit();return}if(scene==='cafe'){if(cafePos.x<250&&cafePos.y>370){setScene('foreshore');return}if(Math.hypot(cafePos.x-160,cafePos.y-296)<110){talkMaddie();return}say('Walk over to Maddie near the counter, or head to the exit at the bottom left.');return}if(scene==='foreshore'){foreshoreInteract();return}const nearbyFinds=finds.map((o,i)=>({...o,kind:'find',i})).filter(o=>!taken.has(o.i)&&dist(o,player)<=95).sort((a,b)=>dist(a,player)-dist(b,player));const nearbySpots=spots.map((o,i)=>({...o,kind:'spot',i})).filter(o=>dist(o,player)<=95).sort((a,b)=>dist(a,player)-dist(b,player));const o=nearbyFinds[0]||nearbySpots[0];if(!o||dist(o,player)>95){say('Walk closer to a landmark or something on the ground.');return}if(o.kind==='spot'){discovered.add(o.i);say(o.desc)}else{taken.add(o.i);const n=Math.min(o.qty,pocketSpace77(o.item));if(n){inventory[o.item]=(inventory[o.item]||0)+n;say('Collected '+o.item+' ×'+n)}else{taken.delete(o.i);say('Pockets full. Unload at the HiAce.')}}hud();save()}function journal(){if(scene==='foreshore'){open('Cuntown journal',`<p>Places discovered: ${[...foreshoreFound].map(escapeHtml).join(', ')||'none yet'}</p><p>Train rides: ${trainRides}</p><p>Fish caught: ${Object.entries(fishCaught).map(([k,v])=>escapeHtml(k)+' ×'+v).join(', ')||'none yet'}</p><p>Aggie’s journal: the beach smells wonderful; seabirds remain suspicious.</p>`);return}if(scene==='cafe'){open('Our Slice · Journal',`<p>First date: Goose Café, Busselton.</p><p>Games with Maddie: ${cafeGames}</p><p>Best guessing score: ${cafeBest}/3</p><p>Aggie’s sniff-and-discover journal will grow as new areas are added.</p>`);return}let rows=spots.map((o,i)=>`<p>${discovered.has(i)?"✓":"○"} ${discovered.has(i)?o.n:"Undiscovered location"}</p>`).join("");open("Bush block journal",`<p>Explore landmarks to complete your discoveries.</p>${rows}<p>${discovered.size} of ${spots.length} discovered.</p>`)}function nearVan(){return dist(player,spots[0])<135}function storage(){if(scene!=='bush'){say('Your van storage is at the bush block. Use Travel to visit.');return}if(!nearVan()){say('Walk over to the campervan to access storage.');return}let content='<p>Shared campervan storage (local test only). Tap an item to move it.</p><b>Backpack</b><div>';for(const [k,v] of Object.entries(inventory))if(v)content+=`<button data-move="in" data-item="${k}">${k} ×${v} → van</button>`;content+='</div><b>Van</b><div>';for(const [k,v] of Object.entries(stored))if(v)content+=`<button data-move="out" data-item="${k}">← ${k} ×${v}</button>`;content+='</div>';open('Campervan storage',content);panel.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>{let k=b.dataset.item,src=b.dataset.move==='in'?inventory:stored,dst=b.dataset.move==='in'?stored:inventory;if(src[k]>0){src[k]--;dst[k]=(dst[k]||0)+1;save();hud();storage()}})}function setupCamp(){if(scene!=='bush'){say('Camping is available at the bush block. Use Travel to visit.');return}if(!nearVan()){say('Walk near your van to set up camp.');return}open('Choose a campsite preset','<p>One tap places the setup beside your van.</p><button data-camp="van">Campervan + awning</button><button data-camp="swag">Swag</button><button data-camp="tent">Tent</button><button data-camp="none">Pack up</button>');panel.querySelectorAll('[data-camp]').forEach(b=>b.onclick=()=>{camp=b.dataset.camp;panel.style.display='none';say(camp==='none'?'Campsite packed away.':`Set up ${camp} campsite.`);save()})}document.getElementById('journal').onclick=journal;document.getElementById('explore').onclick=explore;document.getElementById('storage').onclick=storage;document.getElementById('camp').onclick=setupCamp;for(const b of document.querySelectorAll('[data-key]')){const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys[k]=true;b.classList.add('pressed')});const release=e=>{e.preventDefault();keys[k]=false;b.classList.remove('pressed')};b.addEventListener('pointerup',release);b.addEventListener('pointercancel',release);b.addEventListener('lostpointercapture',()=>{keys[k]=false;b.classList.remove('pressed')})}document.getElementById('controls').addEventListener('contextmenu',e=>e.preventDefault());document.getElementById('controls').addEventListener('selectstart',e=>e.preventDefault());window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false;document.querySelectorAll('.pressed').forEach(b=>b.classList.remove('pressed'))});document.addEventListener('keydown',e=>{const k={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',a:'left',s:'down',d:'right'}[e.key];if(k){keys[k]=true;e.preventDefault()}if(e.key==='e')explore()});document.addEventListener('keyup',e=>{const k={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',a:'left',s:'down',d:'right'}[e.key];if(k)keys[k]=false});function ellipse(x,y,rx,ry,c){ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill()}function line(points,color,width){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke()}function tree(x,y,s=1){ctx.fillStyle='#675943';ctx.fillRect(x-5*s,y-2*s,10*s,24*s);ellipse(x,y,24*s,23*s,'#3e6446');ellipse(x-8*s,y-9*s,16*s,15*s,'#577e52');ellipse(x+9*s,y-4*s,12*s,14*s,'#6f915b')}function van(){
 // Compact top-down HiAce silhouette, based on the supplied camper photographs.
 const x=660,y=590;
 ctx.fillStyle='#404347';ctx.fillRect(x-71,y+25,142,15);
@@ -518,7 +792,7 @@ ctx.fillStyle='#f8edcf';ctx.font='bold 19px system-ui';ctx.fillText(roadTrip.to=
 ctx.font='14px system-ui';ctx.fillText('Road trip · '+(netRole==='guest'?'Kieran':'Tegan')+' and Aggie',15,55);
 if(p>=1)finishRoadTrip();
 }
-function draw(t){if(roadTrip){drawRoadTrip(t);return}if(shops[scene]){drawShop();return}if(scene==='foreshore'){drawForeshore(t);return}if(scene==='cafe'){drawCafe(t);return}const w=canvas.width,h=canvas.height;camera.x=Math.max(0,Math.min(W-w,player.x-w/2));camera.y=Math.max(0,Math.min(H-h,player.y-h/2));ctx.clearRect(0,0,w,h);ctx.save();ctx.translate(-camera.x,-camera.y);ctx.fillStyle='#a1b183';ctx.fillRect(0,0,W,H);for(let i=0;i<900;i++){const x=(i*193+41)%W,y=(i*317+37)%H;ellipse(x,y,2+(i%4),2,'#8fa879')}line([[0,680],[260,665],[420,630],[600,620],[800,610],[1020,590],[1370,560],[1900,520]],'#c2ad86',62);line([[160,1450],[320,1290],[590,1180],[830,1040],[970,880],[1060,690],[1170,460],[1260,240],[1390,0]],'#7ea8a5',45);line([[160,1450],[320,1290],[590,1180],[830,1040],[970,880],[1060,690],[1170,460],[1260,240],[1390,0]],'#b0c5ad',3);line([[380,670],[390,820],[425,960],[600,1080],[760,1200]],'#b4a184',17);for(let i=0;i<145;i++){const x=(i*271+87)%W,y=(i*197+101)%H;if(Math.hypot(x-660,y-590)<145||Math.hypot(x-1510,y-770)<100||Math.abs(y-(670-x*.07))<45)continue;tree(x,y,.7+(i%5)*.15)}for(let i=0;i<260;i++){const x=(i*383+81)%W,y=(i*227+113)%H;if(Math.hypot(x-660,y-590)<100)continue;if(i%4===0)shrub(x,y,.55+(i%3)*.18);else grass(x,y)}fallenLog(720,850);fallenLog(1290,1000);ellipse(1100,440,95,60,'#979487');ellipse(1080,425,52,33,'#b5b0a1');ellipse(1510,770,130,95,'#b4b38d');for(let i=0;i<17;i++){const a=i*2.399,rad=17+(i*31)%87;ellipse(1100+Math.cos(a)*rad,440+Math.sin(a)*rad*.57,3+(i%4),2+(i%3),'#878578')}van();drawDecorations();for(let i=0;i<finds.length;i++){if(taken.has(i))continue;const o=finds[i];ellipse(o.x,o.y,8,5,'#b58c56');ellipse(o.x,o.y-4,3,3,'#eee0b5')}for(const s of spots){ctx.fillStyle='#273f31bb';ctx.fillRect(s.x-47,s.y-89,94,19);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='12px system-ui';ctx.fillText(s.n,s.x,s.y-75)}const bx=1100+Math.sin(t*.0005)*120,by=330+Math.sin(t*.002)*12;ctx.fillStyle='#313d34';ctx.beginPath();ctx.moveTo(bx-12,by);ctx.lineTo(bx,by-6);ctx.lineTo(bx+12,by);ctx.lineTo(bx,by+5);ctx.fill();ellipse(dog.x,dog.y,16,9,'#352b2b');ctx.fillStyle='#252323';ctx.beginPath();ctx.moveTo(dog.x+5,dog.y-4);ctx.lineTo(dog.x+8,dog.y-24);ctx.lineTo(dog.x+15,dog.y-4);ctx.fill();ellipse(dog.x+12,dog.y-4,7,7,'#302829');ctx.fillStyle='#e3e1d5';ctx.fillRect(dog.x-10,dog.y+4,5,10);ctx.fillRect(dog.x+8,dog.y+4,5,10);line([[dog.x-15,dog.y],[dog.x-25,dog.y-12]],'#302829',4);drawPerson(player.x,player.y,netRole==='guest'?'#3d6665':'#ad5967','#6e503b',netRole!=='guest');ctx.fillStyle='#fffbe8';ctx.strokeStyle='#203f2b';ctx.lineWidth=3;ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.strokeText(netRole==='guest'?'Kieran':'Tegan',player.x,player.y-48);ctx.fillText(netRole==='guest'?'Kieran':'Tegan',player.x,player.y-48);ctx.textAlign='left';ctx.restore();if(t-swear>12000&&Math.hypot(dog.x-bx,dog.y-by)<280){swear=t;say('Aggie: WOOF! ... Fuck!')}}const WALK_SPEED=.19,DRIVE_SPEED=.55;
+function draw(t){if(roadTrip){drawRoadTrip(t);return}if(shops[scene]){drawShop();return}if(scene==='foreshore'){drawForeshore(t);return}if(scene==='cafe'){drawCafe(t);return}const w=canvas.width,h=canvas.height;camera.x=Math.max(0,Math.min(W-w,player.x-w/2));camera.y=Math.max(0,Math.min(H-h,player.y-h/2));ctx.clearRect(0,0,w,h);ctx.save();ctx.translate(-camera.x,-camera.y);ctx.fillStyle='#a1b183';ctx.fillRect(0,0,W,H);for(let i=0;i<900;i++){const x=(i*193+41)%W,y=(i*317+37)%H;ellipse(x,y,2+(i%4),2,'#8fa879')}line([[0,680],[260,665],[420,630],[600,620],[800,610],[1020,590],[1370,560],[1900,520]],'#c2ad86',62);line([[160,1450],[320,1290],[590,1180],[830,1040],[970,880],[1060,690],[1170,460],[1260,240],[1390,0]],'#7ea8a5',45);line([[160,1450],[320,1290],[590,1180],[830,1040],[970,880],[1060,690],[1170,460],[1260,240],[1390,0]],'#b0c5ad',3);line([[380,670],[390,820],[425,960],[600,1080],[760,1200]],'#b4a184',17);for(let i=0;i<145;i++){const x=(i*271+87)%W,y=(i*197+101)%H;if(Math.hypot(x-660,y-590)<145||Math.hypot(x-1510,y-770)<100||Math.abs(y-(670-x*.07))<45)continue;tree(x,y,.7+(i%5)*.15)}for(let i=0;i<260;i++){const x=(i*383+81)%W,y=(i*227+113)%H;if(Math.hypot(x-660,y-590)<100)continue;if(i%4===0)shrub(x,y,.55+(i%3)*.18);else grass(x,y)}for(let i=0;i<finds.length;i++){const f=finds[i];if(f.visual==='log'&&!taken.has(i))fallenLog(f.x,f.y)}ellipse(1100,440,95,60,'#979487');ellipse(1080,425,52,33,'#b5b0a1');ellipse(1510,770,130,95,'#b4b38d');for(let i=0;i<17;i++){const a=i*2.399,rad=17+(i*31)%87;ellipse(1100+Math.cos(a)*rad,440+Math.sin(a)*rad*.57,3+(i%4),2+(i%3),'#878578')}van();drawDecorations();drawBuildGuides();for(let i=0;i<finds.length;i++){if(taken.has(i))continue;const o=finds[i];if(o.visual==='log')continue;ellipse(o.x,o.y,8,5,'#b58c56');ellipse(o.x,o.y-4,3,3,'#eee0b5')}for(const s of spots){ctx.fillStyle='#273f31bb';ctx.fillRect(s.x-47,s.y-89,94,19);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='12px system-ui';ctx.fillText(s.n,s.x,s.y-75)}const bx=1100+Math.sin(t*.0005)*120,by=330+Math.sin(t*.002)*12;ctx.fillStyle='#313d34';ctx.beginPath();ctx.moveTo(bx-12,by);ctx.lineTo(bx,by-6);ctx.lineTo(bx+12,by);ctx.lineTo(bx,by+5);ctx.fill();ellipse(dog.x,dog.y,16,9,'#352b2b');ctx.fillStyle='#252323';ctx.beginPath();ctx.moveTo(dog.x+5,dog.y-4);ctx.lineTo(dog.x+8,dog.y-24);ctx.lineTo(dog.x+15,dog.y-4);ctx.fill();ellipse(dog.x+12,dog.y-4,7,7,'#302829');ctx.fillStyle='#e3e1d5';ctx.fillRect(dog.x-10,dog.y+4,5,10);ctx.fillRect(dog.x+8,dog.y+4,5,10);line([[dog.x-15,dog.y],[dog.x-25,dog.y-12]],'#302829',4);drawPerson(player.x,player.y,netRole==='guest'?'#3d6665':'#ad5967','#6e503b',netRole!=='guest');ctx.fillStyle='#fffbe8';ctx.strokeStyle='#203f2b';ctx.lineWidth=3;ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.strokeText(netRole==='guest'?'Kieran':'Tegan',player.x,player.y-48);ctx.fillText(netRole==='guest'?'Kieran':'Tegan',player.x,player.y-48);ctx.textAlign='left';ctx.restore();if(t-swear>12000&&Math.hypot(dog.x-bx,dog.y-by)<280){swear=t;say('Aggie: WOOF! ... Fuck!')}}const WALK_SPEED=.19,DRIVE_SPEED=.55;
 const touchMove={active:false,pointerId:null,goal:null,velocity:{x:0,y:0}};
 function controlledPosition(){if(shops[scene])return shopPos;if(scene==='cafe')return cafePos;if(scene==='foreshore')return vanDrive.active?vanDrive:foreshore;return player}
 function touchWorldPosition(e){
@@ -536,10 +810,11 @@ function cancelTouchMovement(){touchMove.active=false;touchMove.pointerId=null;t
 canvas.addEventListener('pointerdown',e=>{
  if(panel.style.display!=='none'||roadTrip)return;
  if(e.pointerType==='mouse'&&e.button!==0)return;
- e.preventDefault();if(scene==='bush'&&buildMode){placeDecoration(touchWorldPosition(e).x,touchWorldPosition(e).y);return}touchMove.active=true;touchMove.pointerId=e.pointerId;
+ e.preventDefault();if(scene==='bush'&&buildMode){const p=touchWorldPosition(e);placeDecoration(p.x,p.y);return}touchMove.active=true;touchMove.pointerId=e.pointerId;
  touchMove.goal=touchWorldPosition(e);canvas.setPointerCapture(e.pointerId);
 });
 canvas.addEventListener('pointermove',e=>{
+ if(scene==='bush'&&buildMode&&buildMode.kind==='room'&&buildMode.corner){const p=touchWorldPosition(e);buildMode.hover={x:Math.round(p.x/20)*20,y:Math.round(p.y/20)*20}}
  if(touchMove.active&&touchMove.pointerId===e.pointerId){e.preventDefault();touchMove.goal=touchWorldPosition(e)}
 });
 canvas.addEventListener('pointerup',e=>{
@@ -567,5 +842,5 @@ function movementVector(dt){
  return touchMove.velocity;
 }
 function frame(t){const dt=Math.min(40,t-last||16);last=t;if(!roadTrip&&shops[scene]&&panel.style.display==='none'){const move=movementVector(dt);shopPos.x=Math.max(42,Math.min(595,shopPos.x+move.x*dt*WALK_SPEED));shopPos.y=Math.max(100,Math.min(410,shopPos.y+move.y*dt*WALK_SPEED));if(shopPos.x<145&&shopPos.y>396)leaveShop()}
-if(!roadTrip&&scene==='cafe'&&panel.style.display==='none'){const move=movementVector(dt);cafePos.x=Math.max(35,Math.min(570,cafePos.x+move.x*dt*WALK_SPEED));cafePos.y=Math.max(225,Math.min(395,cafePos.y+move.y*dt*WALK_SPEED));if(cafePos.x<125&&cafePos.y>365){setScene('foreshore');foreshore.x=350;foreshore.y=420}}if(!roadTrip&&scene==='foreshore'&&panel.style.display==='none'){const move=movementVector(dt);if(vanDrive.active){vanDrive.x=Math.max(35,Math.min(660,vanDrive.x+move.x*dt*DRIVE_SPEED));vanDrive.y=Math.max(730,Math.min(835,vanDrive.y+move.y*dt*DRIVE_SPEED));foreshore.x=vanDrive.x;foreshore.y=vanDrive.y;if(vanDrive.x<65){vanDrive.active=false;sharedTravelOffer('bush')}}else{foreshore.x=Math.max(35,Math.min(COAST_W-45,foreshore.x+move.x*dt*WALK_SPEED));foreshore.y=Math.max(50,Math.min(COAST_H-50,foreshore.y+move.y*dt*WALK_SPEED));}if(foreshore.x>700&&foreshore.x<JETTY_END-110){foreshore.y=Math.max(430,Math.min(470,foreshore.y))}if(foreshore.x>JETTY_END-200&&foreshore.x<JETTY_END+50){foreshoreFound.add('Jetty end');if(foreshore.x>JETTY_END-110)jettyWalked=true}if(foreshore.x>700&&foreshore.x<800)foreshoreFound.add('Jetty entrance')}if(!roadTrip&&!shops[scene]&&panel.style.display==='none'&&!vanDrive.active)followCompanions(dt);if(!roadTrip&&scene==='bush'&&panel.style.display==='none'){const move=movementVector(dt);player.x=Math.max(20,Math.min(W-20,player.x+move.x*dt*WALK_SPEED));player.y=Math.max(20,Math.min(H-20,player.y+move.y*dt*WALK_SPEED));if(dist(player,dog)>32){dog.x+=(player.x-dog.x)*Math.min(1,dt*.005);dog.y+=(player.y-dog.y)*Math.min(1,dt*.005)}}draw(t);netOverlay();drawIdentity();netSend();if(scene==='bush'&&!roadTrip){ctx.fillStyle='#e9e1c9';ctx.font='bold 13px system-ui';ctx.fillText('ROAD EXIT ←  (walk to west edge, then Explore)',12,25)}requestAnimationFrame(frame)}if(scene==='foreshore'){companion.foreshore.k={x:foreshore.x-75,y:foreshore.y+16};companion.foreshore.a={x:foreshore.x+42,y:foreshore.y+25}}hud();setScene(scene);setInterval(()=>{save();if(Date.now()-progressSentAt>8000)sendProgress()},3500);window.addEventListener('pagehide',()=>{save();cafeSave()});setInterval(cafeSave,5000);requestAnimationFrame(frame)})();
+if(!roadTrip&&scene==='cafe'&&panel.style.display==='none'){const move=movementVector(dt);cafePos.x=Math.max(35,Math.min(570,cafePos.x+move.x*dt*WALK_SPEED));cafePos.y=Math.max(225,Math.min(395,cafePos.y+move.y*dt*WALK_SPEED));if(cafePos.x<125&&cafePos.y>365){setScene('foreshore');foreshore.x=350;foreshore.y=420}}if(!roadTrip&&scene==='foreshore'&&panel.style.display==='none'){const move=movementVector(dt);if(vanDrive.active){vanDrive.x=Math.max(35,Math.min(660,vanDrive.x+move.x*dt*DRIVE_SPEED));vanDrive.y=Math.max(730,Math.min(835,vanDrive.y+move.y*dt*DRIVE_SPEED));foreshore.x=vanDrive.x;foreshore.y=vanDrive.y;if(vanDrive.x<65){vanDrive.active=false;sharedTravelOffer('bush')}}else{foreshore.x=Math.max(35,Math.min(COAST_W-45,foreshore.x+move.x*dt*WALK_SPEED));foreshore.y=Math.max(50,Math.min(COAST_H-50,foreshore.y+move.y*dt*WALK_SPEED));}if(foreshore.x>700&&foreshore.x<JETTY_END-110){foreshore.y=Math.max(430,Math.min(470,foreshore.y))}if(foreshore.x>JETTY_END-200&&foreshore.x<JETTY_END+50){foreshoreFound.add('Jetty end');if(foreshore.x>JETTY_END-110)jettyWalked=true}if(foreshore.x>700&&foreshore.x<800)foreshoreFound.add('Jetty entrance')}if(!roadTrip&&!shops[scene]&&panel.style.display==='none'&&!vanDrive.active)followCompanions(dt);if(!roadTrip&&scene==='bush'&&panel.style.display==='none'){const move=movementVector(dt);moveThroughRooms(player.x+move.x*dt*WALK_SPEED,player.y+move.y*dt*WALK_SPEED);if(dist(player,dog)>32){dog.x+=(player.x-dog.x)*Math.min(1,dt*.005);dog.y+=(player.y-dog.y)*Math.min(1,dt*.005)}}draw(t);netOverlay();drawIdentity();netSend();if(scene==='bush'&&!roadTrip){ctx.fillStyle='#e9e1c9';ctx.font='bold 13px system-ui';ctx.fillText('ROAD EXIT ←  (walk to west edge, then Explore)',12,25)}requestAnimationFrame(frame)}if(scene==='foreshore'){companion.foreshore.k={x:foreshore.x-75,y:foreshore.y+16};companion.foreshore.a={x:foreshore.x+42,y:foreshore.y+25}}hud();setScene(scene);setInterval(()=>{save();if(Date.now()-progressSentAt>8000)sendProgress()},3500);window.addEventListener('pagehide',()=>{save();cafeSave()});setInterval(cafeSave,5000);requestAnimationFrame(frame)})();
 </script></body></html>
