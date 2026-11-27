@@ -329,7 +329,7 @@ const buildCatalog=[
 ];
 let buildObjects=[];
 try{const a=JSON.parse(localStorage.getItem(BUILD_KEY)||'[]');if(Array.isArray(a))buildObjects=a.filter(validBuild).slice(0,40)}catch{}
-function validBuild(o){return o&&typeof o==='object'&&buildCatalog.some(c=>c.id===o.kind)&&typeof o.id==='string'&&o.id.length<80&&Number.isFinite(o.x)&&Number.isFinite(o.y)&&o.x>=20&&o.x<=W-20&&o.y>=20&&o.y<=H-20&&Number.isFinite(o.at)&&(o.kind!=='room'||(Number.isFinite(o.w)&&Number.isFinite(o.h)&&o.w>=40&&o.h>=40&&o.x+o.w<=W-20&&o.y+o.h<=H-20))}
+function validBuild(o){return o&&typeof o==='object'&&buildCatalog.some(c=>c.id===o.kind)&&typeof o.id==='string'&&o.id.length<80&&Number.isFinite(o.x)&&Number.isFinite(o.y)&&o.x>=20&&o.x<=W-20&&o.y>=20&&o.y<=H-20&&Number.isFinite(o.at)&&(o.kind!=='room'||(Number.isFinite(o.w)&&Number.isFinite(o.h)&&o.w>=40&&o.h>=40&&o.x+o.w<=W-20&&o.y+o.h<=H-20&&(!('openings' in o)||(Array.isArray(o.openings)&&o.openings.length<=30&&o.openings.every(p=>p&&['door','window'].includes(p.kind)&&['top','bottom','left','right'].includes(p.side)&&Number.isFinite(p.pos)&&p.pos>=0&&p.pos<=((p.side==='top'||p.side==='bottom')?o.w:o.h))))))}
 function saveBuild(){try{localStorage.setItem(BUILD_KEY,JSON.stringify(buildObjects))}catch{say('Unable to save decorations on this device.')}}
 function sendBuildSync(){if(netConn&&netConn.open)netConn.send({type:'build-sync',objects:buildObjects})}
 function handleBuildMessage(d){
@@ -370,7 +370,7 @@ function undoBuild(redo=false){
 function buildMenu(){
  if(scene!=='bush'){say('Travel to Our Slice to build and decorate.');return}
  const categories=[
- ['Structures',[['room','Draw a rectangular room']]],
+ ['Structures',[['room','Draw a rectangular room'],['door','Add a door to a room'],['window','Add a window to a room']]],
  ['Furniture',buildCatalog.filter(c=>['bench','table','chair','sign'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Landscaping',buildCatalog.filter(c=>['firepit','lantern'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Gardening',buildCatalog.filter(c=>['garden','planter'].includes(c.id)).map(c=>[c.id,c.name])],
@@ -381,7 +381,7 @@ function buildMenu(){
  panel.querySelectorAll('[data-build-action]').forEach(b=>b.onclick=()=>{
  const kind=b.dataset.buildAction;
  if(kind==='undo'||kind==='redo'){undoBuild(kind==='redo');buildMenu();return}
- if(['remove','move','rotate'].includes(kind)){buildMode={action:kind};panel.style.display='none';say(kind==='remove'?'Tap an item to remove it.':kind==='move'?'Tap the furniture you want to move.':'Tap furniture to rotate it 90 degrees.');return}
+ if(['remove','move','rotate','door','window'].includes(kind)){buildMode={action:kind};panel.style.display='none';say(kind==='remove'?'Tap an item to remove it.':kind==='move'?'Tap the furniture you want to move.':kind==='rotate'?'Tap furniture to rotate it 90 degrees.':'Tap near the wall where you want a '+kind+'.');return}
  if(buildObjects.filter(o=>!o.deleted).length>=40){say('Building limit reached.');return}
  buildMode={kind};panel.style.display='none';say(kind==='room'?'Tap the first corner of your room.':'Tap to place your item.');
  });
@@ -390,6 +390,7 @@ let buildMode=null;
 function placeDecoration(x,y){
  if(!buildMode)return false;
  if(buildMode.action){
+  if(buildMode.action==='door'||buildMode.action==='window')return placeOpening(x,y,buildMode.action);
   if(buildMode.action==='move'&&buildMode.selected){
    const o=buildObjects.find(o=>o.id===buildMode.selected);
    if(!o||o.deleted){buildMode=null;say('That item is no longer available.');return true}
@@ -429,10 +430,72 @@ function placeDecoration(x,y){
  buildObjects.push({id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),kind,x:Math.round(x),y:Math.round(y),at:Date.now()});
  recordBuild(buildObjects[buildObjects.length-1].id,true);buildMode=null;saveBuild();sendBuildSync();say('Placed '+buildCatalog.find(c=>c.id===kind).name+'.');return true;
 }
+// Doors and windows belong to rooms so they survive save/load and multiplayer sync.
+function placeOpening(x,y,kind){
+ const width=kind==='door'?32:24;
+ let choice=null,dist=24;
+ for(const room of buildObjects){
+  if(room.deleted||room.kind!=='room')continue;
+  const walls=[
+   {side:'top',d:Math.abs(y-room.y),pos:x-room.x,length:room.w},
+   {side:'bottom',d:Math.abs(y-(room.y+room.h)),pos:x-room.x,length:room.w},
+   {side:'left',d:Math.abs(x-room.x),pos:y-room.y,length:room.h},
+   {side:'right',d:Math.abs(x-(room.x+room.w)),pos:y-room.y,length:room.h}
+  ];
+  for(const w of walls){
+   if(w.pos<0||w.pos>w.length||w.d>=dist)continue;
+   const pos=Math.max(18+width/2,Math.min(w.length-18-width/2,w.pos));
+   if(w.length<width+36)continue;
+   choice={room,side:w.side,pos:Math.round(pos)};dist=w.d;
+  }
+ }
+ if(!choice){say('Tap near the edge of a room with enough wall space.');return true}
+ const {room,side,pos}=choice;
+ const openings=Array.isArray(room.openings)?room.openings:[];
+ if(openings.some(o=>o.side===side&&Math.abs(o.pos-pos)<(o.kind==='door'?32:24)/2+width/2+8)){
+  say('Leave more space between doors and windows.');return true;
+ }
+ const next={...room,openings:[...openings,{side,pos,kind}],at:Date.now()};
+ recordBuildChange(room,next);buildMode=null;saveBuild();sendBuildSync();say(kind==='door'?'Door added.':'Window added.');return true;
+}
+function drawRoom(room){
+ ctx.save();
+ ctx.fillStyle='#cbb994';ctx.fillRect(room.x,room.y,room.w,room.h);
+ ctx.strokeStyle='#e6d8b6';ctx.lineWidth=2;ctx.strokeRect(room.x+12,room.y+12,room.w-24,room.h-24);
+ const openings=Array.isArray(room.openings)?room.openings:[];
+ for(const [side,length] of [['top',room.w],['bottom',room.w],['left',room.h],['right',room.h]]){
+  const slots=openings.filter(o=>o.side===side&&['door','window'].includes(o.kind)&&Number.isFinite(o.pos)).sort((a,b)=>a.pos-b.pos);
+  let cursor=0;
+  const wall=(from,to)=>{
+   if(to<=from)return;
+   ctx.fillStyle='#715844';
+   if(side==='top')ctx.fillRect(room.x+from,room.y-5,to-from,10);
+   if(side==='bottom')ctx.fillRect(room.x+from,room.y+room.h-5,to-from,10);
+   if(side==='left')ctx.fillRect(room.x-5,room.y+from,10,to-from);
+   if(side==='right')ctx.fillRect(room.x+room.w-5,room.y+from,10,to-from);
+  };
+  for(const slot of slots){
+   const half=slot.kind==='door'?16:12,start=Math.max(cursor,slot.pos-half),end=Math.min(length,slot.pos+half);
+   wall(cursor,start);
+   ctx.fillStyle=slot.kind==='door'?'#b78a55':'#8cc5d2';
+   if(side==='top'||side==='bottom'){
+    const yy=room.y+(side==='bottom'?room.h:0);
+    ctx.fillRect(room.x+start,yy-4,end-start,8);
+    if(slot.kind==='door'){ctx.strokeStyle='#f5d5a0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(room.x+start,yy,24,0,Math.PI/2);ctx.stroke()}
+   }else{
+    const xx=room.x+(side==='right'?room.w:0);
+    ctx.fillRect(xx-4,room.y+start,8,end-start);
+   }
+   cursor=end;
+  }
+  wall(cursor,length);
+ }
+ ctx.restore();
+}
 function drawDecorations(){
  for(const o of buildObjects){if(o.deleted)continue;
  const c=buildCatalog.find(c=>c.id===o.kind);if(!c)continue;
- if(o.kind==='room'){ctx.save();ctx.fillStyle='#cbb994';ctx.fillRect(o.x,o.y,o.w,o.h);ctx.strokeStyle='#715844';ctx.lineWidth=12;ctx.strokeRect(o.x+6,o.y+6,o.w-12,o.h-12);ctx.strokeStyle='#e6d8b6';ctx.lineWidth=2;ctx.strokeRect(o.x+12,o.y+12,o.w-24,o.h-24);ctx.restore();continue}
+ if(o.kind==='room'){drawRoom(o);continue}
  ctx.save();ctx.translate(o.x,o.y);ctx.rotate((o.rotation||0)*Math.PI/180);
  ctx.fillStyle='#25382b66';ctx.beginPath();ctx.ellipse(0,8,25,9,0,0,Math.PI*2);ctx.fill();
  ctx.fillStyle=c.color;
