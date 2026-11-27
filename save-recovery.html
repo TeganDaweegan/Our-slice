@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Our Slice — Save Recovery</title><style>body{font:16px system-ui;background:#15251e;color:#f3f3ed;max-width:650px;margin:auto;padding:22px}button{font:inherit;padding:12px;margin:8px 5px 8px 0;border:0;border-radius:7px}article{border:1px solid #5c7365;padding:12px;margin:10px 0;border-radius:8px}small{color:#c8d9ce}pre{white-space:pre-wrap;overflow-wrap:anywhere}strong{color:#fff}</style></head><body><h1>Our Slice — Save Recovery</h1><p>This page only reads saved browser data. It will not create a new game, replace, delete or modify any saves.</p><p>Use the same browser and browser mode in which you played Update 7.7.</p><button id="scan">Scan saved progress</button><button id="export" disabled>Export all found data</button><div id="results" aria-live="polite"></div><script>
+const prefix='our-slice-preview-7-7::';
+const names=['our-slice-bush-v2','our-slice-cafe-v1','our-slice-foreshore-v1','our-slice-build-v1','our-slice-economy-77','our-slice-save-slots-v1'];
+let found={};
+function scan(){
+ const out=document.getElementById('results');out.textContent='';found={};
+ for(const group of [{label:'Update 7.7 test',prefix},{label:'Original game / older test',prefix:''}]){
+  const box=document.createElement('article');const title=document.createElement('h2');title.textContent=group.label;box.append(title);let count=0;
+  for(const key of names){let value=null;try{value=localStorage.getItem(group.prefix+key)}catch(e){const p=document.createElement('p');p.textContent='Browser storage blocked: '+e.message;box.append(p);break}
+   if(value===null)continue;count++;found[group.prefix+key]=value;
+   const p=document.createElement('p');const b=document.createElement('strong');b.textContent=key+': ';p.append(b);
+   try{const d=JSON.parse(value);let detail='';
+    if(key==='our-slice-save-slots-v1')detail=Array.isArray(d)?d.length+' saved chapter(s)'+(d.length?' — '+d.map(x=>x.name||'Unnamed').join(', '):''):'Save list exists';
+    else if(key==='our-slice-bush-v2')detail='Inventory: '+JSON.stringify(d.inventory||{})+'; collected items: '+(d.taken||[]).length;
+    else if(key==='our-slice-economy-77')detail='Money: '+(d.money||0)+'; van timber: '+(d.vanTimber||0);
+    else if(key==='our-slice-build-v1')detail=Array.isArray(d)?d.length+' placed building object(s)':'Building data exists';
+    else detail='Saved data exists';
+    p.append(document.createTextNode(detail));
+   }catch(e){p.append(document.createTextNode('Saved value exists but could not be read as JSON'))}
+   box.append(p);
+  }
+  if(!count){const p=document.createElement('p');p.textContent='No data found in this save area.';box.append(p)}
+  out.append(box);
+ }
+ document.getElementById('export').disabled=Object.keys(found).length===0;
+}
+document.getElementById('scan').onclick=scan;
+document.getElementById('export').onclick=()=>{const blob=new Blob([JSON.stringify({format:'our-slice-raw-recovery',created:new Date().toISOString(),entries:found},null,2)],{type:'application/json'});const a=document.createElement('a');const url=URL.createObjectURL(blob);a.href=url;a.download='our-slice-recovery-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)};
+</script></body></html>
