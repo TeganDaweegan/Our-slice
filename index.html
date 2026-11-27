@@ -316,6 +316,18 @@ applyUiSettings();
 document.getElementById('menu').onclick=gameMenu;
 
 const BUILD_KEY='our-slice-build-v1';
+const ROOM_MATERIALS={
+ timber:{label:'Timber',floor:'#cbb994',wall:'#715844',trim:'#e6d8b6'},
+ brick:{label:'Brick',floor:'#d3b7a0',wall:'#a45943',trim:'#f0d6c1'},
+ stone:{label:'Stone',floor:'#b6b5a9',wall:'#6c706e',trim:'#e2e2d7'},
+ metal:{label:'Corrugated metal',floor:'#bdc3c0',wall:'#677f85',trim:'#e0e9e8'}
+};
+const ROOM_FLOORS={
+ boards:{label:'Timber boards',color:'#cbb994'},
+ concrete:{label:'Concrete',color:'#b6b8b3'},
+ tiles:{label:'Terracotta tiles',color:'#bd8668'},
+ earth:{label:'Compacted earth',color:'#b69a76'}
+};
 const buildCatalog=[
  {id:'room',name:'Rectangular room',color:'#bca780',cost:0},
  {id:'bench',name:'Timber bench',color:'#866142',cost:0},
@@ -329,7 +341,7 @@ const buildCatalog=[
 ];
 let buildObjects=[];
 try{const a=JSON.parse(localStorage.getItem(BUILD_KEY)||'[]');if(Array.isArray(a))buildObjects=a.filter(validBuild).slice(0,40)}catch{}
-function validBuild(o){return o&&typeof o==='object'&&buildCatalog.some(c=>c.id===o.kind)&&typeof o.id==='string'&&o.id.length<80&&Number.isFinite(o.x)&&Number.isFinite(o.y)&&o.x>=20&&o.x<=W-20&&o.y>=20&&o.y<=H-20&&Number.isFinite(o.at)&&(o.kind!=='room'||(Number.isFinite(o.w)&&Number.isFinite(o.h)&&o.w>=40&&o.h>=40&&o.x+o.w<=W-20&&o.y+o.h<=H-20&&(!('openings' in o)||(Array.isArray(o.openings)&&o.openings.length<=30&&o.openings.every(p=>p&&['door','window'].includes(p.kind)&&['top','bottom','left','right'].includes(p.side)&&Number.isFinite(p.pos)&&p.pos>=0&&p.pos<=((p.side==='top'||p.side==='bottom')?o.w:o.h))))))}
+function validBuild(o){return o&&typeof o==='object'&&buildCatalog.some(c=>c.id===o.kind)&&typeof o.id==='string'&&o.id.length<80&&Number.isFinite(o.x)&&Number.isFinite(o.y)&&o.x>=20&&o.x<=W-20&&o.y>=20&&o.y<=H-20&&Number.isFinite(o.at)&&(o.kind!=='room'||(Number.isFinite(o.w)&&Number.isFinite(o.h)&&o.w>=40&&o.h>=40&&o.x+o.w<=W-20&&o.y+o.h<=H-20&&(!o.material||Object.hasOwn(ROOM_MATERIALS,o.material))&&(!o.floor||Object.hasOwn(ROOM_FLOORS,o.floor))&&(!('openings' in o)||(Array.isArray(o.openings)&&o.openings.length<=30&&o.openings.every(p=>p&&['door','window'].includes(p.kind)&&['top','bottom','left','right'].includes(p.side)&&Number.isFinite(p.pos)&&p.pos>=0&&p.pos<=((p.side==='top'||p.side==='bottom')?o.w:o.h))))))}
 function saveBuild(){try{localStorage.setItem(BUILD_KEY,JSON.stringify(buildObjects))}catch{say('Unable to save decorations on this device.')}}
 function sendBuildSync(){if(netConn&&netConn.open)netConn.send({type:'build-sync',objects:buildObjects})}
 function handleBuildMessage(d){
@@ -370,7 +382,7 @@ function undoBuild(redo=false){
 function buildMenu(){
  if(scene!=='bush'){say('Travel to Our Slice to build and decorate.');return}
  const categories=[
- ['Structures',[['room','Draw a rectangular room'],['door','Add a door to a room'],['window','Add a window to a room']]],
+ ['Structures',[['room','Draw a rectangular room'],['door','Add a door to a room'],['window','Add a window to a room'],['material','Change wall material'],['floor','Change floor finish']]],
  ['Furniture',buildCatalog.filter(c=>['bench','table','chair','sign'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Landscaping',buildCatalog.filter(c=>['firepit','lantern'].includes(c.id)).map(c=>[c.id,c.name])],
  ['Gardening',buildCatalog.filter(c=>['garden','planter'].includes(c.id)).map(c=>[c.id,c.name])],
@@ -381,7 +393,7 @@ function buildMenu(){
  panel.querySelectorAll('[data-build-action]').forEach(b=>b.onclick=()=>{
  const kind=b.dataset.buildAction;
  if(kind==='undo'||kind==='redo'){undoBuild(kind==='redo');buildMenu();return}
- if(['remove','move','rotate','door','window'].includes(kind)){buildMode={action:kind};panel.style.display='none';say(kind==='remove'?'Tap an item to remove it.':kind==='move'?'Tap the furniture you want to move.':kind==='rotate'?'Tap furniture to rotate it 90 degrees.':'Tap near the wall where you want a '+kind+'.');return}
+ if(['remove','move','rotate','door','window','material','floor'].includes(kind)){buildMode={action:kind};panel.style.display='none';say(kind==='remove'?'Tap an item to remove it.':kind==='move'?'Tap the furniture you want to move.':kind==='rotate'?'Tap furniture to rotate it 90 degrees.':kind==='material'||kind==='floor'?'Tap a room to change its '+(kind==='material'?'walls.':'floor.'):'Tap near the wall where you want a '+kind+'.');return}
  if(buildObjects.filter(o=>!o.deleted).length>=40){say('Building limit reached.');return}
  buildMode={kind};panel.style.display='none';say(kind==='room'?'Tap the first corner of your room.':'Tap to place your item.');
  });
@@ -391,6 +403,7 @@ function placeDecoration(x,y){
  if(!buildMode)return false;
  if(buildMode.action){
   if(buildMode.action==='door'||buildMode.action==='window')return placeOpening(x,y,buildMode.action);
+  if(buildMode.action==='material'||buildMode.action==='floor')return selectRoomFinish(x,y,buildMode.action);
   if(buildMode.action==='move'&&buildMode.selected){
    const o=buildObjects.find(o=>o.id===buildMode.selected);
    if(!o||o.deleted){buildMode=null;say('That item is no longer available.');return true}
@@ -458,17 +471,34 @@ function placeOpening(x,y,kind){
  const next={...room,openings:[...openings,{side,pos,kind}],at:Date.now()};
  recordBuildChange(room,next);buildMode=null;saveBuild();sendBuildSync();say(kind==='door'?'Door added.':'Window added.');return true;
 }
+function selectRoomFinish(x,y,property){
+ const room=[...buildObjects].reverse().find(o=>!o.deleted&&o.kind==='room'&&x>=o.x&&x<=o.x+o.w&&y>=o.y&&y<=o.y+o.h);
+ if(!room){say('Tap inside a room to choose its finish.');return true}
+ buildMode=null;
+ const options=property==='material'?ROOM_MATERIALS:ROOM_FLOORS;
+ const buttons=Object.entries(options).map(([key,value])=>'<button data-room-finish="'+key+'">'+value.label+'</button>').join('');
+ open(property==='material'?'Wall materials':'Floor finishes','<p>Choose a finish for this room.</p>'+buttons);
+ panel.querySelectorAll('[data-room-finish]').forEach(b=>b.onclick=()=>{
+  const current=buildObjects.find(o=>o.id===room.id);
+  if(!current||current.deleted){say('Room no longer exists.');panel.style.display='none';return}
+  const next={...current,[property]:b.dataset.roomFinish,at:Date.now()};
+  recordBuildChange(current,next);saveBuild();sendBuildSync();panel.style.display='none';say('Room finish updated.');
+ });
+ return true;
+}
 function drawRoom(room){
  ctx.save();
- ctx.fillStyle='#cbb994';ctx.fillRect(room.x,room.y,room.w,room.h);
- ctx.strokeStyle='#e6d8b6';ctx.lineWidth=2;ctx.strokeRect(room.x+12,room.y+12,room.w-24,room.h-24);
+ const material=ROOM_MATERIALS[room.material]||ROOM_MATERIALS.timber;
+ const floor=ROOM_FLOORS[room.floor]||ROOM_FLOORS.boards;
+ ctx.fillStyle=room.floor?floor.color:material.floor;ctx.fillRect(room.x,room.y,room.w,room.h);
+ ctx.strokeStyle=material.trim;ctx.lineWidth=2;ctx.strokeRect(room.x+12,room.y+12,room.w-24,room.h-24);
  const openings=Array.isArray(room.openings)?room.openings:[];
  for(const [side,length] of [['top',room.w],['bottom',room.w],['left',room.h],['right',room.h]]){
   const slots=openings.filter(o=>o.side===side&&['door','window'].includes(o.kind)&&Number.isFinite(o.pos)).sort((a,b)=>a.pos-b.pos);
   let cursor=0;
   const wall=(from,to)=>{
    if(to<=from)return;
-   ctx.fillStyle='#715844';
+   ctx.fillStyle=material.wall;
    if(side==='top')ctx.fillRect(room.x+from,room.y-5,to-from,10);
    if(side==='bottom')ctx.fillRect(room.x+from,room.y+room.h-5,to-from,10);
    if(side==='left')ctx.fillRect(room.x-5,room.y+from,10,to-from);
