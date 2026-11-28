@@ -1,11 +1,18 @@
-name: Our Slice browser smoke tests
+name: Our Slice browser tests
 on:
   push:
     paths:
       - 'test-7-*.html'
       - 'tests/**'
       - '.github/workflows/our-slice-tests.yml'
+  pull_request:
+    paths:
+      - 'test-7-*.html'
+      - 'tests/**'
+      - '.github/workflows/our-slice-tests.yml'
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   browser-tests:
     runs-on: ubuntu-latest
@@ -15,12 +22,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-save playwright
+      - run: npm install --no-save playwright@1.62.1
       - run: npx playwright install --with-deps chromium
-      - name: Serve test build
-        run: python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/our-slice-http.log 2>&1 &
-      - name: Run browser smoke tests
-        run: node tests/smoke.cjs
+      - name: Run browser tests
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/our-slice-http.log 2>&1 &
+          server=$!
+          trap 'kill "$server"' EXIT
+          curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 1 \
+            http://127.0.0.1:8765/test-7-13.html -o /dev/null
+          node --test tests/smoke.cjs
       - name: Upload failure screenshots
         if: failure()
         uses: actions/upload-artifact@v4
