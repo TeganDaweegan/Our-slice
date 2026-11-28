@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Our Slice — Combined Recovery</title><style>body{background:#142c23;color:#f8f1de;font:18px system-ui;margin:0;padding:24px;line-height:1.5}main{max-width:660px;margin:auto}button,input{font:inherit;padding:15px;margin:12px 0;max-width:100%}button{background:#e9e3d5;border:0;border-radius:9px}button:disabled{opacity:.45}#status{border:1px solid #aaa;padding:16px;border-radius:10px;min-height:70px}a{color:#c6e9f4}</style></head><body><main><h1>Our Slice — Combine Recovered Progress</h1><p>This creates a new Update 7.7 chapter with your earlier rooms, doors, windows, bench and planter, alongside your timber and money. It does not load the chapter, replace your active game or delete other saves.</p><p>Choose your latest recovery JSON file dated 28 November.</p><input id="file" type="file" accept=".json,application/json"><p><button id="check">Check combined recovery</button></p><p id="status" role="status">No changes have been made.</p><p><button id="add" disabled>Add combined chapter</button></p><p>Afterward, <a href="test-7-7.html?v=12">open Update 7.7</a> and use Save Game to see the chapter. Loading it is a separate action.</p></main><script>
+const status=document.getElementById('status'),check=document.getElementById('check'),add=document.getElementById('add');let combined=null;
+check.onclick=async()=>{
+ combined=null;add.disabled=true;const file=document.getElementById('file').files[0];
+ if(!file){status.textContent='Select the backup dated 28 November first.';return}
+ try{
+ if(file.size>1000000)throw Error('File too large');
+ const raw=JSON.parse(await file.text());if(raw.format!=='our-slice-raw-recovery'||!raw.entries)throw Error('Not an Our Slice backup');
+ const e=raw.entries,read=k=>JSON.parse(e[k]||'null');
+ const objects6=read('our-slice-preview-7-6::our-slice-build-v1'),bush6=read('our-slice-preview-7-6::our-slice-bush-v2'),bush7=read('our-slice-preview-7-7::our-slice-bush-v2'),econ=read('our-slice-preview-7-7::our-slice-economy-77'),old=read('our-slice-save-slots-v1');
+ const t2=old?.find(x=>x.name==='t2');
+ if(!t2||!Array.isArray(objects6)||!bush6||!bush7||!econ)throw Error('Backup missing expected data');
+ const objects=[...new Map([...t2.data.build,...objects6].map(o=>[o.id,o])).values()];
+ if(!objects.some(o=>!o.deleted&&o.kind==='room'&&o.openings?.some(p=>p.kind==='door')&&o.openings?.some(p=>p.kind==='window')))throw Error('Saved doors and windows missing');
+ const bush=structuredClone(t2.data.bush);
+ bush.inventory.Gumnuts=Math.max(bush.inventory.Gumnuts||0,bush6.inventory.Gumnuts||0,bush7.inventory.Gumnuts||0);
+ const data={format:'our-slice-backup',version:1,created:new Date().toISOString(),bush,cafe:t2.data.cafe,foreshore:t2.data.foreshore,build:objects,economy77:econ};
+ combined={name:'Combined recovery - buildings and 7.7',date:new Date().toLocaleString(),data};
+ status.textContent='Verified: '+objects.filter(o=>!o.deleted).length+' placed objects, including '+objects.filter(o=>!o.deleted&&o.kind==='room').length+' rooms, doors/windows, bench and planter; '+bush.inventory.Gumnuts+' gumnuts, $'+econ.money+' and '+econ.vanTimber+' timber in HiAce. No saves changed yet.';
+ add.disabled=false;
+ }catch(err){status.textContent='Unable to prepare recovery: '+err.message}
+};
+add.onclick=()=>{
+ if(!combined)return;
+ const key='our-slice-preview-7-7::our-slice-save-slots-v1';
+ try{
+ const existing=JSON.parse(localStorage.getItem(key)||'[]');
+ if(!Array.isArray(existing)||existing.length>=12)throw Error('Save list invalid or full');
+ if(existing.some(x=>x.name===combined.name)){status.textContent='Combined chapter already exists. Nothing changed.';return}
+ const backup=new Blob([JSON.stringify({key,chapters:existing},null,2)],{type:'application/json'}),url=URL.createObjectURL(backup),a=document.createElement('a');
+ a.href=url;a.download='our-slice-chapters-before-merge.json';a.click();
+ localStorage.setItem(key,JSON.stringify([combined,...existing]));
+ status.textContent='Combined chapter added. Your active game and older chapters were not changed. Open the 7.7 test and choose Save Game to see the new chapter.';
+ add.disabled=true;
+ }catch(err){status.textContent='Nothing changed: '+err.message}
+};
+</script></body></html>
