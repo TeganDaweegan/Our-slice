@@ -318,3 +318,47 @@ scenario('Legacy backup without building or economy fields can be cancelled with
     assert.deepEqual(await read(page, slots), [savedChapter]);
   } finally { page.off('dialog', handle); }
 }, { [slots]: [savedChapter], [build]: [room] });
+
+scenario('Accepted legacy import preserves economy and allows recovery from the original chapter', async page => {
+  await tap(page, '#backup');
+  page.once('dialog', dialog => dialog.accept('Original progress'));
+  await tap(page, '#slot-create');
+  await message(page, 'Chapter saved');
+  const chapters = await read(page, slots);
+  const original = chapters[0].data;
+  await page.getByText('Backup files and transfer', { exact: true }).tap();
+  const legacy = { format: 'our-slice-backup', version: 1,
+    bush: savedChapter.data.bush, cafe: savedChapter.data.cafe, foreshore: {} };
+  await page.locator('#import-backup').setInputFiles({
+    name: 'legacy-backup.json', mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(legacy)),
+  });
+  const prompts = [];
+  const accept = async dialog => { prompts.push(dialog.message()); await dialog.accept(); };
+  page.on('dialog', accept);
+  try {
+    await tap(page, '#restore-backup');
+    await message(page, 'Loaded Imported backup');
+  } finally { page.off('dialog', accept); }
+  assert.equal(prompts.length, 2);
+  assert.match(prompts[1], /no placed buildings/);
+  assert.deepEqual((await read(page, bush)).inventory, legacy.bush.inventory);
+  assert.deepEqual(await read(page, economy), original.economy77);
+  assert.deepEqual(await read(page, build), []);
+  assert.deepEqual(await read(page, history), { undo: [], redo: [] });
+  assert.deepEqual(await read(page, slots), chapters);
+  const snapshot = (await read(page, previous)).entries;
+  assert.deepEqual(JSON.parse(snapshot[build]), original.build);
+  assert.deepEqual(JSON.parse(snapshot[economy]), original.economy77);
+  await page.reload();
+  await tap(page, '#backup');
+  page.once('dialog', dialog => dialog.accept());
+  await tap(page, '[data-load="0"]');
+  await message(page, 'Loaded Original progress');
+  await page.reload();
+  assert.deepEqual((await read(page, bush)).inventory, original.bush.inventory);
+  assert.deepEqual((await read(page, bush)).stored, original.bush.stored);
+  assert.deepEqual(await read(page, economy), original.economy77);
+  assert.deepEqual(await read(page, build), original.build);
+  assert.deepEqual(await read(page, slots), chapters);
+}, { [slots]: [savedChapter], [build]: [room] });
