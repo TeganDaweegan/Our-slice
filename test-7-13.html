@@ -291,21 +291,57 @@ function exportAllProgress78(){
  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
 }
 
-function restoreSave(data){if(data.format!=='our-slice-backup'||data.version!==1||!data.bush||!data.cafe||!data.foreshore)throw Error('Invalid save');restoringChapter77=true;
- const keys=['our-slice-bush-v2','our-slice-cafe-v1','our-slice-foreshore-v1',BUILD_KEY,ECON77_KEY,'our-slice-build-history-v1'];
- const before={};for(const key of keys)before[key]=testStorage.getItem(key);
- const existingBuild=JSON.parse(testStorage.getItem(BUILD_KEY)||'[]');
- if(Array.isArray(existingBuild)&&existingBuild.some(o=>!o.deleted)&&(!Array.isArray(data.build)||!data.build.some(o=>!o.deleted))&&!confirm('Warning: this chapter has no placed buildings, but your current game does. Loading it will hide your buildings until you reload a chapter with them. Continue?')){restoringChapter77=false;return}
- testStorage.setItem('our-slice-pre-restore-77',JSON.stringify({date:new Date().toISOString(),entries:before}));
- testStorage.setItem('our-slice-bush-v2',JSON.stringify(data.bush));testStorage.setItem('our-slice-cafe-v1',JSON.stringify(data.cafe));testStorage.setItem('our-slice-foreshore-v1',JSON.stringify(data.foreshore));testStorage.setItem(BUILD_KEY,JSON.stringify(Array.isArray(data.build)?data.build:[]));testStorage.setItem('our-slice-build-history-v1',JSON.stringify(data.buildHistory&&Array.isArray(data.buildHistory.undo)&&Array.isArray(data.buildHistory.redo)?data.buildHistory:{undo:[],redo:[]}));if(data.economy77)testStorage.setItem(ECON77_KEY,JSON.stringify(data.economy77));testStorage.setItem('our-slice-restore-report-77',JSON.stringify({name:restoreName77,expectedBuild:Array.isArray(data.build)?data.build.length:0,at:new Date().toISOString()}));location.reload()}
+function restoreSave(data){
+ if(data.format!=='our-slice-backup'||data.version!==1||!data.bush||!data.cafe||!data.foreshore)throw Error('Invalid save');
+ const keys=['our-slice-bush-v2','our-slice-cafe-v1','our-slice-foreshore-v1',BUILD_KEY,ECON77_KEY,BUILD_HISTORY_KEY];
+ const before=Object.fromEntries(keys.map(key=>[key,testStorage.getItem(key)]));
+ const existingBuild=JSON.parse(before[BUILD_KEY]||'[]'),nextBuild=Array.isArray(data.build)?data.build:[];
+ if(Array.isArray(existingBuild)&&existingBuild.some(o=>!o.deleted)&&!nextBuild.some(o=>!o.deleted)&&!confirm('Warning: this chapter has no placed buildings, but your current game does. Loading it will hide your buildings until you reload a chapter with them. Continue?'))return;
+ const safetyKey='our-slice-pre-restore-77',reportKey='our-slice-restore-report-77';
+ const changes=[
+  [safetyKey,{date:new Date().toISOString(),entries:before}],
+  ['our-slice-bush-v2',data.bush],
+  ['our-slice-cafe-v1',data.cafe],
+  ['our-slice-foreshore-v1',data.foreshore],
+  [BUILD_KEY,nextBuild],
+  [BUILD_HISTORY_KEY,data.buildHistory&&Array.isArray(data.buildHistory.undo)&&Array.isArray(data.buildHistory.redo)?data.buildHistory:{undo:[],redo:[]}]
+ ];
+ if(data.economy77)changes.push([ECON77_KEY,data.economy77]);
+ changes.push([reportKey,{name:restoreName77,expectedBuild:nextBuild.length,at:new Date().toISOString()}]);
+ const originalSafety=testStorage.getItem(safetyKey);
+ const written=[];
+ restoringChapter77=true;
+ try{
+  for(const [key,value] of changes){
+   testStorage.setItem(key,JSON.stringify(value));
+   written.push(key);
+  }
+ }catch(error){
+  let rollbackFailed=false;
+  for(const key of written.reverse()){
+   // If any active key cannot be recovered, keep the safety snapshot for recovery.
+   if(key===safetyKey&&rollbackFailed)continue;
+   const value=key===safetyKey?originalSafety:before[key];
+   try{
+    if(value===null)testStorage.removeItem(key);
+    else testStorage.setItem(key,value);
+   }catch{rollbackFailed=true}
+  }
+  restoringChapter77=false;
+  if(rollbackFailed)throw Error('Storage rollback incomplete. Export ALL chapters to keep the pre-restore safety copy.');
+  throw error;
+ }
+ location.reload();
+}
 function backupPanel(){
  const slots=getSlots();
+ const activeBuilds=buildObjects.filter(o=>!o.deleted);
  const cards=slots.length?slots.map((a,i)=>`<div class="story-save"><div class="story-copy"><strong>${escapeHtml(a.name||'Our Adventure')}</strong><small>Last saved ${escapeHtml(a.date||'')} · ${Array.isArray(a.data?.build)?a.data.build.length+' building objects':'No building snapshot in this chapter'}</small><div class="story-actions"><button class="story-primary" data-update="${i}">Save our progress</button><button class="story-secondary" data-load="${i}">Continue chapter</button><button class="story-delete" data-delete="${i}">Delete</button></div></div></div>`).join(''):'<div class="story-empty">No saved chapters yet. Start a new chapter below.</div>';
- open('Save Game',`<p class="story-note">Active property: ${buildObjects.filter(o=>!o.deleted).length} building objects. ${buildObjects.length?'<button id="locate-build77">Find my buildings</button>':''}</p>${cards}<button class="story-create" id="slot-create">+ Start a new chapter</button><details><summary>Backup files and transfer</summary><p class="story-note">Export backup with you if you change phones. You can bring it back here later.</p><button id="export-backup">Export current chapter</button><button id="export-all-78">Export ALL chapters and building history</button><input id="import-backup" type="file" accept=".json,application/json"><button id="restore-backup">Import backup</button></details><p class="story-note">Progress also autosaves on this phone. Saved chapters are stored in this browser; export a backup before clearing browser data.</p>`);
+ open('Save Game',`<p class="story-note">Active property: ${activeBuilds.length} building object${activeBuilds.length===1?'':'s'}. ${activeBuilds.length?'<button id="locate-build77">Find my buildings</button>':''}</p>${cards}<button class="story-create" id="slot-create">+ Start a new chapter</button><details><summary>Backup files and transfer</summary><p class="story-note">Export backup with you if you change phones. You can bring it back here later.</p><button id="export-backup">Export current chapter</button><button id="export-all-78">Export ALL chapters and building history</button><input id="import-backup" type="file" accept=".json,application/json"><button id="restore-backup">Import backup</button></details><p class="story-note">Progress also autosaves on this phone. Saved chapters are stored in this browser; export a backup before clearing browser data.</p>`);
  panel.classList.add('storybook');
- const locate=document.getElementById('locate-build77');if(locate)locate.onclick=()=>{const o=buildObjects.find(o=>!o.deleted);if(!o){say('No placed buildings in this active chapter.');return}scene='bush';player.x=o.x;player.y=Math.max(35,o.y-65);dog.x=player.x+24;dog.y=player.y+15;panel.style.display='none';hud();say('Showing your saved '+o.kind+'.')};
+ const locate=document.getElementById('locate-build77');if(locate)locate.onclick=()=>{const o=buildObjects.find(o=>!o.deleted);if(!o)return;buildMode=null;player.x=o.x;player.y=Math.max(35,o.y-65);dog.x=player.x+24;dog.y=player.y+15;setScene('bush');say('Showing your saved '+o.kind+'.')};
  document.getElementById('slot-create').onclick=()=>{const name=prompt('What shall we call this chapter?','Our Slice — '+new Date().toLocaleDateString());if(name===null)return;const a=getSlots();a.unshift({name:(name.trim()||'Our Adventure').slice(0,60),date:new Date().toLocaleString(),data:captureSave()});try{testStorage.setItem(SLOT_KEY,JSON.stringify(a));backupPanel();say('Chapter saved.')}catch(e){say('Could not save this chapter. Browser storage may be full.')}};
- panel.querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>{const a=getSlots()[+b.dataset.load];if(a&&confirm('Return to "'+a.name+'"? This will replace your current automatic progress.')){try{restoreName77=a.name;restoreSave(a.data)}catch(e){say('Could not open this chapter.')}}});
+ panel.querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>{const a=getSlots()[+b.dataset.load];if(a&&confirm('Return to "'+a.name+'"? This will replace your current automatic progress.')){try{restoreName77=a.name;restoreSave(a.data)}catch(e){say('Could not open this chapter. '+e.message)}}});
  panel.querySelectorAll('[data-update]').forEach(b=>b.onclick=()=>{const a=getSlots(),i=+b.dataset.update;if(!a[i])return;if(!confirm('Overwrite the saved chapter "'+a[i].name+'" with the current game? This cannot be undone unless you have a backup.'))return;try{a[i]={...a[i],date:new Date().toLocaleString(),data:captureSave()};testStorage.setItem(SLOT_KEY,JSON.stringify(a));backupPanel();say('Progress saved: '+a[i].name)}catch(e){say('Could not save this chapter. Browser storage may be full.')}});
  panel.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>{const a=getSlots(),i=+b.dataset.delete;if(a[i]&&confirm('Permanently delete "'+a[i].name+'"? Export ALL chapters first if you may need it later.')){a.splice(i,1);testStorage.setItem(SLOT_KEY,JSON.stringify(a));backupPanel()}});
  document.getElementById('export-backup').onclick=makeBackup;
@@ -388,7 +424,7 @@ const buildCatalog=[
  {id:'sign',name:'Our Slice sign',color:'#b58b58',cost:0}
 ];
 let buildObjects=[];
-try{const a=JSON.parse(testStorage.getItem(BUILD_KEY)||'[]');if(Array.isArray(a))buildObjects=a.filter(validBuild).slice(0,40)}catch{}
+try{const a=JSON.parse(testStorage.getItem(BUILD_KEY)||'[]');if(Array.isArray(a))buildObjects=a.filter(validBuild)}catch{}
 function validBuild(o){return o&&typeof o==='object'&&(buildCatalog.some(c=>c.id===o.kind)||['panel-floor','panel-wall','panel-door','panel-window'].includes(o.kind))&&typeof o.id==='string'&&o.id.length<80&&Number.isFinite(o.x)&&Number.isFinite(o.y)&&o.x>=20&&o.x<=W-20&&o.y>=20&&o.y<=H-20&&Number.isFinite(o.at)&&(o.kind!=='room'||(Number.isFinite(o.w)&&Number.isFinite(o.h)&&o.w>=40&&o.h>=40&&o.x+o.w<=W-20&&o.y+o.h<=H-20&&(!o.material||Object.hasOwn(ROOM_MATERIALS,o.material))&&(!o.floor||Object.hasOwn(ROOM_FLOORS,o.floor))&&(!('openings' in o)||(Array.isArray(o.openings)&&o.openings.length<=30&&o.openings.every(p=>p&&['door','window'].includes(p.kind)&&['top','bottom','left','right'].includes(p.side)&&Number.isFinite(p.pos)&&p.pos>=0&&p.pos<=((p.side==='top'||p.side==='bottom')?o.w:o.h))))))}
 function saveBuild(){try{testStorage.setItem(BUILD_KEY,JSON.stringify(buildObjects))}catch{say('Unable to save decorations on this device.')}}
 function sendBuildSync(){if(netConn&&netConn.open)netConn.send({type:'build-sync',objects:buildObjects})}
@@ -396,11 +432,17 @@ function handleBuildMessage(d){
  if(!d||d.type!=='build-sync')return false;
  if(!Array.isArray(d.objects))return true;
  let changed=false;
- for(const o of d.objects.slice(0,40)){
+ let active=buildObjects.filter(o=>!o.deleted).length;
+ for(const o of d.objects){
   if(!validBuild(o))continue;
   const i=buildObjects.findIndex(a=>a.id===o.id);
-  if(i<0&&buildObjects.length<40){buildObjects.push(o);changed=true}
-  else if(i>=0&&o.at>buildObjects[i].at){buildObjects[i]=o;changed=true}
+  const previous=buildObjects[i];
+  if(previous&&o.at<=previous.at)continue;
+  const nextActive=active+Number(!o.deleted)-Number(Boolean(previous&&!previous.deleted));
+  if(nextActive>40&&nextActive>active)continue;
+  if(previous)buildObjects[i]=o;
+  else buildObjects.push(o);
+  active=nextActive;changed=true;
  }
  if(changed){saveBuild();say('Decorations synced from the other player.')}
  return true;
@@ -896,7 +938,9 @@ function movementVector(dt){
  if(l){touchMove.goal=null;tx=dx/l;ty=dy/l}
  else if(touchMove.goal&&panel.style.display==='none'&&!roadTrip){
   const p=controlledPosition(),vx=touchMove.goal.x-p.x,vy=touchMove.goal.y-p.y,d=Math.hypot(vx,vy);
-  if(d>5){tx=vx/d;ty=vy/d}else{touchMove.goal=null}
+  if(d>5){tx=vx/d;ty=vy/d}
+  else if(!vanDrive.active){cancelTouchMovement();return touchMove.velocity}
+  else{touchMove.goal=null}
  }
  // Low-pass filter direction and speed to avoid sudden changes.
  const blend=1-Math.exp(-dt/110);
