@@ -246,3 +246,41 @@ scenario('A failed chapter restore rolls back active progress and keeps autosavi
   await world(page, 880, 750);
   await savedPosition(page, { minX: 855, maxX: 890 });
 }, { [slots]: [savedChapter], [build]: [room] });
+
+scenario('Incomplete rollback retains the emergency snapshot in the full export', async page => {
+  await tap(page, '#backup');
+  page.once('dialog', dialog => dialog.accept('Current chapter'));
+  await tap(page, '#slot-create');
+  await message(page, 'Chapter saved');
+  const keys = [bush, cafe, shore, build, economy, history];
+  const before = await page.evaluate(({ keys, prefix }) =>
+    Object.fromEntries(keys.map(key => [key, localStorage.getItem(prefix + key)])),
+    { keys, prefix });
+  const chapters = await read(page, slots);
+  await page.evaluate(({ prefix, economy, bush }) => {
+    const original = Storage.prototype.setItem;
+    let restoring = false;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === prefix + economy) {
+        restoring = true;
+        throw new DOMException('Restore write failed', 'QuotaExceededError');
+      }
+      if (restoring && key === prefix + bush) {
+        Storage.prototype.setItem = original;
+        throw new DOMException('Rollback write failed', 'QuotaExceededError');
+      }
+      return original.call(this, key, value);
+    };
+  }, { prefix, economy, bush });
+  await confirmRestore(page);
+  await message(page, 'Storage rollback incomplete');
+  assert.deepEqual((await read(page, previous)).entries, before);
+  assert.deepEqual(await read(page, slots), chapters);
+  await page.getByText('Backup files and transfer', { exact: true }).tap();
+  const download = page.waitForEvent('download');
+  await tap(page, '#export-all-78');
+  const exported = JSON.parse(await readFile(await (await download).path()));
+  assert.equal(exported.format, 'our-slice-raw-recovery');
+  assert.deepEqual(JSON.parse(exported.entries[prefix + previous]).entries, before);
+  assert.deepEqual(JSON.parse(exported.entries[prefix + slots]), chapters);
+}, { [slots]: [savedChapter], [build]: [room], [previous]: { entries: {} } });
