@@ -284,3 +284,37 @@ scenario('Incomplete rollback retains the emergency snapshot in the full export'
   assert.deepEqual(JSON.parse(exported.entries[prefix + previous]).entries, before);
   assert.deepEqual(JSON.parse(exported.entries[prefix + slots]), chapters);
 }, { [slots]: [savedChapter], [build]: [room], [previous]: { entries: {} } });
+
+scenario('Legacy backup without building or economy fields can be cancelled without losing progress', async page => {
+  await tap(page, '#backup');
+  await page.getByText('Backup files and transfer', { exact: true }).tap();
+  const legacy = { format: 'our-slice-backup', version: 1,
+    bush: savedChapter.data.bush, cafe: savedChapter.data.cafe, foreshore: {} };
+  await page.locator('#import-backup').setInputFiles({
+    name: 'legacy-backup.json', mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(legacy)),
+  });
+  const keys = [bush, cafe, shore, build, economy, history, previous, slots];
+  const before = await Promise.all(keys.map(key => read(page, key)));
+  const prompts = [];
+  const handle = async dialog => {
+    prompts.push(dialog.message());
+    if (prompts.length === 1) await dialog.accept();
+    else await dialog.dismiss();
+  };
+  page.on('dialog', handle);
+  try {
+    await tap(page, '#restore-backup');
+    await page.waitForFunction(() => document.querySelector('#restore-backup') !== null);
+    await assert.doesNotReject(async () => {
+      for (let i = 0; i < 50 && prompts.length < 2; i++) await new Promise(resolve => setTimeout(resolve, 100));
+      assert.equal(prompts.length, 2);
+    });
+    assert.match(prompts[1], /no placed buildings/);
+    assert.deepEqual(await Promise.all(keys.map(key => read(page, key))), before);
+    await page.reload();
+    assert.deepEqual(await read(page, build), [room]);
+    assert.equal((await read(page, economy)).money, 93);
+    assert.deepEqual(await read(page, slots), [savedChapter]);
+  } finally { page.off('dialog', handle); }
+}, { [slots]: [savedChapter], [build]: [room] });
