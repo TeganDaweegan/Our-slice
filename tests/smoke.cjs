@@ -326,6 +326,11 @@ scenario('Accepted legacy import preserves economy and allows recovery from the 
   await message(page, 'Chapter saved');
   const chapters = await read(page, slots);
   const original = chapters[0].data;
+  // Legacy imports leave the persisted economy untouched; chapter capture adds defaults in memory.
+  const originalRawEconomy = await read(page, economy);
+  assert.equal(originalRawEconomy.money, original.economy77.money);
+  assert.equal(originalRawEconomy.toolbelt.hammer, original.economy77.toolbelt.hammer);
+  assert.equal(originalRawEconomy.panels.door, original.economy77.panels.door);
   await page.getByText('Backup files and transfer', { exact: true }).tap();
   const legacy = { format: 'our-slice-backup', version: 1,
     bush: savedChapter.data.bush, cafe: savedChapter.data.cafe, foreshore: {} };
@@ -343,13 +348,13 @@ scenario('Accepted legacy import preserves economy and allows recovery from the 
   assert.equal(prompts.length, 2);
   assert.match(prompts[1], /no placed buildings/);
   assert.deepEqual((await read(page, bush)).inventory, legacy.bush.inventory);
-  assert.deepEqual(await read(page, economy), original.economy77);
+  assert.deepEqual(await read(page, economy), originalRawEconomy);
   assert.deepEqual(await read(page, build), []);
   assert.deepEqual(await read(page, history), { undo: [], redo: [] });
   assert.deepEqual(await read(page, slots), chapters);
   const snapshot = (await read(page, previous)).entries;
   assert.deepEqual(JSON.parse(snapshot[build]), original.build);
-  assert.deepEqual(JSON.parse(snapshot[economy]), original.economy77);
+  assert.deepEqual(JSON.parse(snapshot[economy]), originalRawEconomy);
   await page.reload();
   await tap(page, '#backup');
   page.once('dialog', dialog => dialog.accept());
